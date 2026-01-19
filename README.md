@@ -1,6 +1,6 @@
 # GroupB_Project
 
-# Project Selection: Project 5
+# Project Selection: Project 2
 
 # Group Members
 # John Hardin, Hans Henrik, Dom Thompson
