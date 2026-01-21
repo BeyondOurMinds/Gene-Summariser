@@ -1,4 +1,5 @@
 import argparse
+from .GroupB_Project5 import main
 
 
 def app():
@@ -7,6 +8,7 @@ def app():
     parser.add_argument('-f','--fasta', help='Path to optional reference FASTA file for sequence-derived metrics')
     args = parser.parse_args()
     
-    print('hello world')
+    # Call the main function from GroupB_Project5.py with the parsed arguments
+    main(args.gff, args.fasta)
     
     return 0
