@@ -83,3 +83,11 @@ class FastaChecker:
         except Exception as e:
             print(f"Error reading FASTA file: {e}")
             return False
+    
+    def fasta_parse(self):
+        try:
+            fasta = SeqIO.to_dict(SeqIO.parse(self.fasta_file, 'fasta'))
+            return fasta
+        except Exception as e:
+            print(f"Error parsing FASTA file: {e}")
+            return None
