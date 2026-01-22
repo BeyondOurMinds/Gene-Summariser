@@ -12,8 +12,13 @@ import sqlite3
 
 # This is the main function for the Gene Model Summariser. 
 def main(gff_file, fasta_file=None):
-    db = load_gff_database(gff_file)
-    logger = setup_logger("gene_model_summariser.log")
+    # temporary placeholder for the main functionality
+    print(f"Processing GFF file: {gff_file}")
+    if fasta_file:
+        print(f"Using reference FASTA file: {fasta_file}")
+    else:
+        print("No reference FASTA file provided.")
+    # Add further processing logic here
 
 def setup_logger(log_file):
     logger = logging.getLogger("GroupB_logger")
@@ -26,7 +31,7 @@ def setup_logger(log_file):
     return logger
 
 
-def load_gff_database(gff_file): # Create or connect to GFF database.
+def load_gff_database(gff_file: str) -> gffutils.FeatureDB: # Create or connect to GFF database.
     db_path = gff_file.replace('.gff', '.db') # replace .gff with .db for database file name
     if not os.path.isfile(db_path): # if the gff.db file does not exist, create it
         try:
@@ -39,13 +44,9 @@ def load_gff_database(gff_file): # Create or connect to GFF database.
         except ValueError:
             raise SystemExit(1)
     return db # return the database object as db
-# Project 5: Gene Model Summariser
-# Group B
 
-#############################################################
-#GFF PARSER TESTER
-#############################################################
-
+class GFFParser:
+    def 
 
 
 '''
