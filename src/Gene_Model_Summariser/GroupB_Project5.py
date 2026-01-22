@@ -38,6 +38,7 @@ def setup_logger(log_file: str) -> logging.Logger:
 
 
 def load_gff_database(gff_file: str) -> gffutils.FeatureDB: # Create or connect to GFF database.
+    gff_file = gff_file.replace('.gff3', '.gff').replace('.gff.gz', '.gff') # normalize file extension
     db_path = gff_file.replace('.gff', '.db') # replace .gff with .db for database file name
     if not os.path.isfile(db_path): # if the gff.db file does not exist, create it
         try:
