@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 # Project 5
 import pandas as pd
 import numpy as np
@@ -16,7 +15,7 @@ def main(gff_file, fasta_file=None):
     else:
         print("No reference FASTA file provided.")
     # Add further processing logic here
-=======
+
 # Project 5: Gene Model Summariser
 # Group B
 '''
@@ -95,5 +94,3 @@ CDS line with multiple parents - flag both lines to be true
 part 5: QC flag tests
 missing gene_id in attributes - expect flag recorded for missing gene_id 
 '''
-
->>>>>>> Stashed changes
