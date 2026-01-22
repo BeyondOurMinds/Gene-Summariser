@@ -6,6 +6,7 @@ import matplotlib
 import os
 import gffutils
 import seaborn as sns
+import logging
 def main(gff_file, fasta_file=None):
     # temporary placeholder for the main functionality
     print(f"Processing GFF file: {gff_file}")
@@ -15,9 +16,27 @@ def main(gff_file, fasta_file=None):
         print("No reference FASTA file provided.")
     # Add further processing logic here
 
+def setup_logger(log_file):
+    logger = logging.getLogger("GroupB_logger")
+    logger.setLevel(logging.INFO)
+    #prevent duplicates if run script multiple times
+    if not logger.handlers:
+        file = logging.FileHandler(log_file)
+        file.setFormatter(logging.Formatter("%(levelname)s - %(asctime)s - %(message)s"))
+        logger.addHandler(file)
+    return logger
+
 
 # Project 5: Gene Model Summariser
 # Group B
+
+#############################################################
+#GFF PARSER TESTER
+#############################################################
+
+
+
+
 '''
 Part 1 - parse the GFF
 
@@ -101,5 +120,5 @@ Push to nextflow and underastand how to use in pipeline
 Make sure all dependencies are in place
 Create environment.yml for conda
 Make sure to test conda package locally before pushing
-Set up bioconda recipe and submit PR   
+Set up bioconda recipe and submit PR
 '''
