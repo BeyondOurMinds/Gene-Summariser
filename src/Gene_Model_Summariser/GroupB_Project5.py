@@ -39,6 +39,12 @@ def load_gff_database(gff_file): # Create or connect to GFF database.
         except ValueError:
             raise SystemExit(1)
     return db # return the database object as db
+
+def QC_flags(db, fasta_file=None):
+    # Function to generate QC flags for gene models from parser data
+    if fasta_file:
+        pass
+
 # Project 5: Gene Model Summariser
 # Group B
 
