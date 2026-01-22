@@ -88,7 +88,18 @@ flags: grab from the flags_by_trancript function and resolve them
 5. Design the outputs in main()
 .json? - speak with john/hans about the best way to do this
 tsv should be easy enough inc the qc_flags.gff3
-###########################################################
+6. Logging - set up a logger to record any issues we find along the way
+Set up at the start of main() function
+Log any issues we find along the way to help the user debug their files if needed
+7. Optional FASTA integration - if the user provides a FASTA file, we can use Biopython to parse it and get sequence lengths for the transcripts
+Use SeqIO to parse the FASTA file
+Create a dictionary mapping sequence IDs to their lengths
+When processing transcripts, look up their lengths in this dictionary and include in the output
+8. Testing - create unit tests to validate each part of the process
+Use pytest to create tests for each function
+Test GFF parsing, relationship mapping, exon counting, has_cds logic, QC flagging, and FASTA integration
+Make sure to cover edge cases and invalid inputs to ensure robustness
+####################
 Testing logic?:
 part 1 - parsing testing 
 make sure the parser skips hashtag lines 
