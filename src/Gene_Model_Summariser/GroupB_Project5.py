@@ -9,13 +9,14 @@ import logging
 import Bio.SeqIO as SeqIO
 import Bio.Seq as Seq
 import sqlite3
+from typing import Optional
 
 # This is the main function for the Gene Model Summariser. 
-def main(gff_file, fasta_file=None):
+def main(gff_file: str, fasta_file: Optional[str] = None) -> None:
     db = load_gff_database(gff_file)
     logger = setup_logger("gene_model_summariser.log")
 
-def setup_logger(log_file):
+def setup_logger(log_file: str) -> logging.Logger:
     logger = logging.getLogger("GroupB_logger")
     logger.setLevel(logging.INFO)
     #prevent duplicates if run script multiple times
@@ -26,7 +27,7 @@ def setup_logger(log_file):
     return logger
 
 
-def load_gff_database(gff_file): # Create or connect to GFF database.
+def load_gff_database(gff_file: str) -> gffutils.FeatureDB: # Create or connect to GFF database.
     db_path = gff_file.replace('.gff', '.db') # replace .gff with .db for database file name
     if not os.path.isfile(db_path): # if the gff.db file does not exist, create it
         try:
@@ -40,24 +41,27 @@ def load_gff_database(gff_file): # Create or connect to GFF database.
             raise SystemExit(1)
     return db # return the database object as db
 
-def QC_flags(db, fasta_file=None):
-    # Function to generate QC flags for gene models from parser data
-    if fasta_file:
-        pass
-
-def gc_content(sequence):
-    # Function to calculate GC content of a given sequence
-    if not sequence:
-        return 0
-    sequence = sequence.upper().rstrip()
-    gc_count = sequence.count('G') + sequence.count('C')
-    return gc_count / len(sequence) * 100
-
-def sequence_length(sequence):
-    # Function to calculate the length of a given sequence
-    if not sequence:
-        return 0
-    return len(sequence.rstrip())
+class QC_flags:
+    # Class to generate QC flags for gene models from parser data
+    def __init__(self, db: gffutils.FeatureDB, fasta_file: Optional[str] = None) -> None:
+        self.db = db
+        self.fasta_file = fasta_file
+    
+    @staticmethod
+    def gc_content(sequence: str) -> float:
+        # Function to calculate GC content of a given sequence
+        if not sequence:
+            return 0
+        sequence = sequence.upper().rstrip()
+        gc_count = sequence.count('G') + sequence.count('C')
+        return gc_count / len(sequence) * 100
+    
+    @staticmethod
+    def sequence_length(sequence: str) -> int:
+        # Function to calculate the length of a given sequence
+        if not sequence:
+            return 0
+        return len(sequence.rstrip())
 
 # Project 5: Gene Model Summariser
 # Group B
