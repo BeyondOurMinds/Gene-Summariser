@@ -14,11 +14,22 @@ def validate_fasta(file_path):
         bool: True if valid FASTA format, False otherwise
     """
     try:
-        with open(file_path, 'r') as f:
-            #check if the file is empty
-            if not f.read(1):
-                print(f"Error: File {file_path} is empty")
-                return False
+        file_path = Path(file_path)
+        
+        #check if file exists
+        if not file_path.exists():
+            print(f"Error: File {file_path} not found")
+            return False
+        
+        #check if it's actually a file, not a directory
+        if not file_path.is_file():
+            print(f"Error: {file_path} is not a file")
+            return False
+        
+        #check if the file is empty
+        if file_path.stat().st_size == 0:
+            print(f"Error: File {file_path} is empty")
+            return False
         
         has_sequence = False
         valid_chars = set('ACGTN')
@@ -26,7 +37,7 @@ def validate_fasta(file_path):
         sequence_count = 0
         
         #SeqIO.parse() will raise an exception if format is invalid
-        for record in SeqIO.parse(file_path, "fasta"):
+        for record in SeqIO.parse(str(file_path), "fasta"):
             has_sequence = True
             sequence_count += 1
             
@@ -65,9 +76,6 @@ def validate_fasta(file_path):
             
         return True
         
-    except FileNotFoundError:
-        print(f"Error: File {file_path} not found")
-        return False
     except Exception as e:
-        print(f"Error reading FASTA file {file_path}: {e}")
+        print(f"Error reading FASTA file: {e}")
         return False
