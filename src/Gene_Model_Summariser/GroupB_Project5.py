@@ -12,13 +12,8 @@ import sqlite3
 
 # This is the main function for the Gene Model Summariser. 
 def main(gff_file, fasta_file=None):
-    # temporary placeholder for the main functionality
-    print(f"Processing GFF file: {gff_file}")
-    if fasta_file:
-        print(f"Using reference FASTA file: {fasta_file}")
-    else:
-        print("No reference FASTA file provided.")
-    # Add further processing logic here
+    db = load_gff_database(gff_file)
+    logger = setup_logger("gene_model_summariser.log")
 
 def setup_logger(log_file):
     logger = logging.getLogger("GroupB_logger")
