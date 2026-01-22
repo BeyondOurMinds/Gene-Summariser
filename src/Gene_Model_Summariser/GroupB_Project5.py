@@ -1,5 +1,10 @@
 # Project 5
+<<<<<<< Updated upstream
+=======
+from ast import List
 from venv import logger
+from xml.parsers.expat import errors
+>>>>>>> Stashed changes
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -10,25 +15,19 @@ import logging
 import Bio.SeqIO as SeqIO
 import Bio.Seq as Seq
 import sqlite3
-from typing import Optional
-from .fasta_validator import FastaChecker
 
 # This is the main function for the Gene Model Summariser. 
-def main(gff_file: str, fasta_file: Optional[str] = None) -> None:
-    db = load_gff_database(gff_file)
-    logger = setup_logger("gene_model_summariser.log")
+def main(gff_file, fasta_file=None):
+    # temporary placeholder for the main functionality
+    print(f"Processing GFF file: {gff_file}")
     if fasta_file:
-        fasta_checker = FastaChecker(fasta_file)
-        if not fasta_checker.validate_fasta():
-            logger.error("Invalid FASTA file provided. Exiting.")
-            raise SystemExit(1)
-        else:
-            logger.info("FASTA file validated successfully.")
-        fasta = fasta_checker.fasta_parse()
-        results = QC_flags(db, fasta).process_all_sequences()
+        print(f"Using reference FASTA file: {fasta_file}")
+    else:
+        print("No reference FASTA file provided.")
+    # Add further processing logic here
 
-def setup_logger(log_file):
-    logger = logging.getLogger("GroupB_logger.log")
+def setup_logger(log_file: str) -> logging.Logger:
+    logger = logging.getLogger("GroupB_logger")
     logger.setLevel(logging.INFO)
     #prevent duplicates if run script multiple times
     if not logger.handlers:
@@ -39,7 +38,6 @@ def setup_logger(log_file):
 
 
 def load_gff_database(gff_file: str) -> gffutils.FeatureDB: # Create or connect to GFF database.
-    gff_file = gff_file.replace('.gff3', '.gff').replace('.gff.gz', '.gff') # normalize file extension
     db_path = gff_file.replace('.gff', '.db') # replace .gff with .db for database file name
     if not os.path.isfile(db_path): # if the gff.db file does not exist, create it
         try:
@@ -53,58 +51,8 @@ def load_gff_database(gff_file: str) -> gffutils.FeatureDB: # Create or connect 
             raise SystemExit(1)
     return db # return the database object as db
 
-class QC_flags:
-    # Class to generate QC flags for gene models from parser data
-    def __init__(self, db: gffutils.FeatureDB, fasta: Optional[dict] = None) -> None:
-        self.db = db
-        self.fasta = fasta
-    
-    def gc_content(self, sequence: str) -> float:
-        '''
-        Takes in a DNA sequence string from the fasta dictionary. 
-        
-        
-        '''
-        if not sequence:
-            return 0
-        sequence = sequence.upper().rstrip()
-        gc_count = sequence.count('G') + sequence.count('C')
-        return gc_count / len(sequence) * 100
-    
-    def sequence_length(self, sequence: str) -> int:
-        # Function to calculate the length of a given sequence
-        if not sequence:
-            return 0
-        return len(sequence.rstrip())
-    
-    def N_content(self, sequence: str) -> tuple[int, float]:
-        # Function to calculate the number of 'N' bases in a given sequence
-        if not sequence:
-            return 0, 0.0
-        N_count = sequence.upper().count('N')
-        try:
-            N_cont_percent = (N_count / len(sequence)) * 100
-        except ZeroDivisionError:
-            N_cont_percent = 0.0
-        return N_count, N_cont_percent
-    
-    def process_all_sequences(self) -> dict[str, dict[str, float | int]]:
-        """Process all sequences in the fasta dictionary and return metrics for each chromosome."""
-        if not self.fasta:
-            return {}
-        
-        results = {}
-        for chrom_id, seq_record in self.fasta.items():
-            sequence = str(seq_record.seq)
-            n_count, n_percent = self.N_content(sequence)
-            results[chrom_id] = {
-                'gc_content': self.gc_content(sequence),
-                'sequence_length': self.sequence_length(sequence),
-                'n_count': n_count,
-                'n_percent': n_percent
-            }
-        return results
 
+<<<<<<< Updated upstream
 # Project 5: Gene Model Summariser
 # Group B
 
@@ -113,50 +61,11 @@ class QC_flags:
 #############################################################
 
 
-#returns True if all passes, else returns False and logs errors to logger
-#going to get the logic for this written first then change it to use SRP logic 
-def check_db(db:gffutils.FeatureDB) -> bool:
-    pass_checked = True #will be returned if everything passes, otherwise returns False
-    for file in db.all_features():
-
-        if file.seqid is None or str(file.seqid).strip() == "":
-            logger.error(f"Missing seqid for feature {file.id}")
-            pass_checked = False
-
-        if file.source is None or str(file.source).strip() == "":
-            logger.error(f"Missing source for feature {file.id}")
-            pass_checked = False
-
-        if file.featuretype is None or str(file.featuretype).strip() == "":
-            logger.error(f"Missing type for feature {file.id}")
-            pass_checked = False
-
-        if file.start is None or file.end is None or file.start == "" or file.end == "":
-            logger.error(f"Feature missing start/end: {file}")
-            pass_checked = False
-
-        if file.start is not None and file.end is not None and file.start != "" and file.end != "" and int(file.start) > int(file.end):
-            logger.error(f"start is bigger than end for feature {file.id}: {file.start} > {file.end}")
-            pass_checked = False
-        
-        if file.strand not in {"+", "-", "."}:
-            logger.error(f"Invalid strand value for feature {file.id}: {file.strand}")
-            pass_checked = False
-
-        if file.score is not None and file.score != ".":
-            try:
-                float(file.score)
-            except ValueError:
-                logger.error(f"Invalid score value for feature {file.id}: {file.score}")
-                pass_checked = False
-        if file.frame not in {None, ".", "0", "1", "2"}:
-            logger.error(f"Invalid phase value for feature {file.id}: {file.frame}")
-            pass_checked = False  
-    return pass_checked
-        
+=======
 
 
         
+>>>>>>> Stashed changes
 
 '''
 Part 1 - parse the GFF
@@ -193,18 +102,7 @@ flags: grab from the flags_by_trancript function and resolve them
 5. Design the outputs in main()
 .json? - speak with john/hans about the best way to do this
 tsv should be easy enough inc the qc_flags.gff3
-6. Logging - set up a logger to record any issues we find along the way
-Set up at the start of main() function
-Log any issues we find along the way to help the user debug their files if needed
-7. Optional FASTA integration - if the user provides a FASTA file, we can use Biopython to parse it and get sequence lengths for the transcripts
-Use SeqIO to parse the FASTA file
-Create a dictionary mapping sequence IDs to their lengths
-When processing transcripts, look up their lengths in this dictionary and include in the output
-8. Testing - create unit tests to validate each part of the process
-Use pytest to create tests for each function
-Test GFF parsing, relationship mapping, exon counting, has_cds logic, QC flagging, and FASTA integration
-Make sure to cover edge cases and invalid inputs to ensure robustness
-####################
+###########################################################
 Testing logic?:
 part 1 - parsing testing 
 make sure the parser skips hashtag lines 
