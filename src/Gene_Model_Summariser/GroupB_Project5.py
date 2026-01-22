@@ -10,6 +10,7 @@ import Bio.SeqIO as SeqIO
 import Bio.Seq as Seq
 import sqlite3
 from typing import Optional
+from .fasta_validator import FastaChecker
 
 # This is the main function for the Gene Model Summariser. 
 def main(gff_file: str, fasta_file: Optional[str] = None) -> None:
