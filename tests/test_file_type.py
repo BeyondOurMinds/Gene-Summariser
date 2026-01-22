@@ -22,6 +22,18 @@ def validate_gff_file(args):
     if file_path.suffix.lower() not in {".gff", ".gff3", ".gtf"}:
         sys.exit(f"Error: File format not supported: {args}. Must be GFF, GFF3, or GTF format.")
 
+def validate_fasta_file(args):
+    file_path = Path(args)
+    
+    if not file_path.exists():
+        sys.exit(f"Error: File not found: {args}")
+
+    if not file_path.is_file():
+        sys.exit(f"Error: Path is not a file: {args}")
+    #adding tester for fasta files
+    if file_path.suffix.lower() not in {".fasta", ".fa", ".fna"}:
+        sys.exit(f"Error: File format not supported: {args}. Must be FASTA format.")
+    
 #
 #checking the GFF utility functions from GroupB_Project5.py
 VALID_GFF = """##gff-file-to-be-skipped-hashtag
@@ -38,15 +50,3 @@ chr1\tsrc\tgene\t100\t10\t.\t+\t.\tID=gene1
 BAD_GFF_STRAND = """##gff-file-to-be-skipped-hashtag
 chr1\tsrc\tgene\t1\t10\t.\tx\t.\tID=gene1
 """
-def validate_fasta_file(args):
-    file_path = Path(args)
-
-    if not file_path.exists():
-        sys.exit(f"Error: File not found: {args}")
-
-    if not file_path.is_file():
-        sys.exit(f"Error: Path is not a file: {args}")
-    #adding tester for fasta files
-    if file_path.suffix.lower() not in {".fasta", ".fa", ".fna"}:
-        sys.exit(f"Error: File format not supported: {args}. Must be FASTA format.")
-    
