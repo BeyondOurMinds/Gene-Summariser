@@ -53,6 +53,12 @@ def gc_content(sequence):
     gc_count = sequence.count('G') + sequence.count('C')
     return gc_count / len(sequence) * 100
 
+def sequence_length(sequence):
+    # Function to calculate the length of a given sequence
+    if not sequence:
+        return 0
+    return len(sequence.rstrip())
+
 # Project 5: Gene Model Summariser
 # Group B
 
