@@ -46,9 +46,11 @@ class QC_flags:
     def __init__(self, db: gffutils.FeatureDB, fasta_file: Optional[str] = None) -> None:
         self.db = db
         self.fasta_file = fasta_file
+        self.fasta = None
+        if fasta_file:
+            self.fasta = SeqIO.to_dict(SeqIO.parse(fasta_file, 'fasta'))
     
-    @staticmethod
-    def gc_content(sequence: str) -> float:
+    def gc_content(self, sequence: str) -> float:
         # Function to calculate GC content of a given sequence
         if not sequence:
             return 0
@@ -56,12 +58,19 @@ class QC_flags:
         gc_count = sequence.count('G') + sequence.count('C')
         return gc_count / len(sequence) * 100
     
-    @staticmethod
-    def sequence_length(sequence: str) -> int:
+    def sequence_length(self, sequence: str) -> int:
         # Function to calculate the length of a given sequence
         if not sequence:
             return 0
         return len(sequence.rstrip())
+    
+    def N_content(self, sequence: str) -> tuple[int, float]:
+        # Function to calculate the number of 'N' bases in a given sequence
+        if not sequence:
+            return 0, 0.0
+        N_count = sequence.upper().count('N')
+        N_cont_percent = (N_count / len(sequence)) * 100
+        return N_count, N_cont_percent
 
 # Project 5: Gene Model Summariser
 # Group B
