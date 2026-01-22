@@ -16,6 +16,14 @@ from .fasta_validator import FastaChecker
 def main(gff_file: str, fasta_file: Optional[str] = None) -> None:
     db = load_gff_database(gff_file)
     logger = setup_logger("gene_model_summariser.log")
+    if fasta_file:
+        fasta_checker = FastaChecker(fasta_file)
+        if not fasta_checker.validate_fasta():
+            logger.error("Invalid FASTA file provided. Exiting.")
+            raise SystemExit(1)
+        else:
+            logger.info("FASTA file validated successfully.")
+        fasta = fasta_checker.fasta_parse()
 
 def setup_logger(log_file: str) -> logging.Logger:
     logger = logging.getLogger("GroupB_logger")
