@@ -59,7 +59,11 @@ class QC_flags:
         self.fasta = fasta
     
     def gc_content(self, sequence: str) -> float:
-        # Function to calculate GC content of a given sequence
+        '''
+        Takes in a DNA sequence string from the fasta dictionary. 
+        
+        
+        '''
         if not sequence:
             return 0
         sequence = sequence.upper().rstrip()
