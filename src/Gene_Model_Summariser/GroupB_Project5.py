@@ -36,7 +36,6 @@ def setup_logger(log_file):
 
 
 
-
 '''
 Part 1 - parse the GFF
 
