@@ -8,4 +8,10 @@ class GFF_Parser:
 
     def get_genes(self) -> list[gffutils.Feature]:
         """Retrieve all gene features from the GFF database."""
-        return list(self.db.features_of_type('gene'))
+        genes = list(self.db.features_of_type('gene'))
+        return genes
+    
+    def get_transcripts(self, gene_id: str) -> list[gffutils.Feature]:
+        """Retrieve all transcript features for a given gene ID."""
+        transcripts = list(self.db.children(gene_id, featuretype='mRNA', order_by='start'))
+        return transcripts
