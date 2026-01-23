@@ -21,3 +21,11 @@ class GFF_Parser:
         exons = list(self.db.children(transcript_id, featuretype='exon'))
         exon_count = len(exons)
         return exon_count
+    
+    def check_cds(self, transcript_id: str) -> bool:
+        """Check if a given transcript has associated CDS features."""
+        has_cds = False
+        cds_features = list(self.db.children(transcript_id, featuretype='CDS'))
+        if cds_features:
+            has_cds = True
+        return has_cds
