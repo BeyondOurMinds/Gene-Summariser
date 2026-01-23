@@ -29,3 +29,23 @@ class GFF_Parser:
         if cds_features:
             has_cds = True
         return has_cds
+    
+    def put_together(self) -> dict:
+        """putting together into one clean model"""
+        output_dict = {}
+        genes = self.get_genes()
+        for gene in genes:
+            if gene.id:
+                transcripts = self.get_transcripts(gene.id)
+            else:
+                continue
+            for transcript in transcripts:
+                if transcript.id:
+                    exon_count = self.count_exons(transcript.id)
+                    has_cds = self.check_cds(transcript.id)
+                    output_dict[transcript.id] = {
+                        'gene_id': gene.id,
+                        'exon_count': exon_count,
+                        'has_cds': has_cds
+                    }
+        return output_dict
