@@ -87,7 +87,6 @@ class QC_flags:
                     overlaps = 'overlapping_exons'
                     gff_flags[transcript_id].append(overlaps)
                     break
-            '''checking CDS start codon'''
             if self.fasta:
                 # Get gene feature from database using gene ID
                 gene_id = features['gene']
