@@ -117,7 +117,10 @@ class QC_flags:
                             gff_flags[transcript_id].append(n_in_cds)
                         if self.ambiguous_bases(cds_seq):
                             ambiguous = 'ambiguous_bases_in_CDS'
-                            gff_flags[transcript_id].append(ambiguous)            
+                            gff_flags[transcript_id].append(ambiguous)
+                    if not features['CDS(s)']:
+                        no_cds = 'no_CDS'
+                        gff_flags[transcript_id].append(no_cds)            
         return gff_flags
 
 gff_file = r'C:\Users\jtspy\Desktop\Bioinformatics\RobustSoftware\Project5Data\models.gff3'
