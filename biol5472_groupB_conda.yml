@@ -6,6 +6,8 @@ channels:
 dependencies:
   - python=3.12
   - pandas
+  - pip
+  - snakemake
   - numpy
   - matplotlib
   - seaborn
