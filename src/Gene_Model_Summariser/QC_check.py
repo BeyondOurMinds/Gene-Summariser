@@ -66,6 +66,17 @@ class QC_flags:
             return False
         return 'N' in sequence.upper()
     
+    def ambiguous_bases(self, sequence: str) -> bool:
+        # Function to check for ambiguous bases other than A, C, G, T, N
+        if not sequence:
+            return False
+        valid_bases = set('ACGTN')
+        sequence = sequence.upper()
+        for base in sequence:
+            if base not in valid_bases:
+                return True
+        return False
+    
     def gff_QC(self) -> dict[str, list[str]]:
         model = GFF_Parser(self.db).transcript_model()
         gff_flags = {}
@@ -101,15 +112,18 @@ class QC_flags:
                             cds_start = feature.start
                             cds_end = feature.end
                             cds_seq += sequence[cds_start-1:cds_end]
-                            if self.contains_N(cds_seq):
-                                n_in_cds = 'N_in_CDS'
-                                gff_flags[transcript_id].append(n_in_cds)            
+                        if self.contains_N(cds_seq):
+                            n_in_cds = 'N_in_CDS'
+                            gff_flags[transcript_id].append(n_in_cds)
+                        if self.ambiguous_bases(cds_seq):
+                            ambiguous = 'ambiguous_bases_in_CDS'
+                            gff_flags[transcript_id].append(ambiguous)            
         return gff_flags
 
-gff_file = r'C:\Users\jtspy\Desktop\Python\BCPyAssessment\PlasmoDB-54_Pfalciparum3D7.gff'
-db_path = gff_file.replace('.gff', '.db')
+gff_file = r'C:\Users\jtspy\Desktop\Bioinformatics\RobustSoftware\Project5Data\models.gff3'
+db_path = gff_file.replace('.gff3', '.db')
 db = gffutils.create_db(gff_file, dbfn=db_path, force=True, keep_order=True)
-fasta_file = r'C:\Users\jtspy\Desktop\Python\BCPyAssessment\PlasmoDB-54_Pfalciparum3D7_Genome.fasta'
+fasta_file = r'C:\Users\jtspy\Desktop\Bioinformatics\RobustSoftware\Project5Data\ref.fasta'
 fasta_checker = FastaChecker(fasta_file)
 fasta = fasta_checker.fasta_parse()
 qc = QC_flags(db, fasta)
