@@ -1,0 +1,15 @@
+name: biol5472_groupB
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.12
+  - pandas
+  - pip
+  - snakemake
+  - numpy
+  - matplotlib
+  - seaborn
+  - gffutils
+  - biopython
