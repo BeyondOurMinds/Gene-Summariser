@@ -1,7 +1,12 @@
 import gffutils
 from typing import Optional
 from Bio.Seq import Seq
-from .gff_parser import GFF_Parser
+try:
+    from .gff_parser import GFF_Parser
+    from .fasta_validator import FastaChecker
+except ImportError:
+    from gff_parser import GFF_Parser
+    from fasta_validator import FastaChecker
 
 class QC_flags:
     # Class to generate QC flags for gene models from parser data
@@ -94,24 +99,72 @@ class QC_flags:
                 chrom_id = gene_feature.seqid
                 seq_record = self.fasta.get(chrom_id)
                 if seq_record:
-                    sequence = str(seq_record.seq)
+                    chrom_sequence = str(seq_record.seq)
                     strand = gene_feature.strand
-                    if strand == '-':
-                        sequence = str(Seq(sequence).reverse_complement())
+                    
                     if features['CDS(s)']:
-                        cds_seq = ''
-                        for feature in features['CDS(s)']:
-                            cds_start = feature.start
-                            cds_end = feature.end
-                            cds_seq += sequence[cds_start-1:cds_end]
-                        if self.contains_N(cds_seq):
-                            n_in_cds = 'N_in_CDS'
-                            gff_flags[transcript_id].append(n_in_cds)
-                        if self.ambiguous_bases(cds_seq):
-                            ambiguous = 'ambiguous_bases_in_CDS'
-                            gff_flags[transcript_id].append(ambiguous)
-                    if not features['CDS(s)']:
-                        no_cds = 'no_CDS'
-                        gff_flags[transcript_id].append(no_cds)            
-        return gff_flags
+                        # Sort CDS features by their start position
+                        # Create list of (start_position, cds_feature) tuples
+                        cds_with_positions = []
+                        for cds in features['CDS(s)']:
+                            cds_with_positions.append((cds.start, cds))
                         
+                        # Sort by start position (first element of tuple)
+                        cds_with_positions.sort()
+                        
+                        # Extract just the CDS features
+                        cds_list = [cds for start, cds in cds_with_positions]
+                        
+                        # For negative strand, process in reverse order
+                        if strand == '-':
+                            cds_list = cds_list[::-1]
+                        
+                        # Build complete CDS sequence with phase adjustment
+                        cds_seq = ''
+                        for cds in cds_list:
+                            # Extract CDS segment from chromosome
+                            cds_segment = chrom_sequence[cds.start-1:cds.end]
+                            
+                            # Reverse complement if on negative strand
+                            if strand == '-':
+                                cds_segment = str(Seq(cds_segment).reverse_complement())
+                            
+                            # Apply phase offset (skip bases at start)
+                            phase = int(cds.frame) if cds.frame != '.' else 0
+                            cds_seq += cds_segment[phase:]
+                        
+                        # Check for issues in the complete CDS sequence
+                        if self.contains_N(cds_seq):
+                            gff_flags[transcript_id].append('N_in_CDS')
+                        if self.ambiguous_bases(cds_seq):
+                            gff_flags[transcript_id].append('ambiguous_bases_in_CDS')
+                        
+                        #check length multiple of 3
+                        if len(cds_seq) % 3 != 0:
+                            gff_flags[transcript_id].append('CDS_not_multiple_of_3')
+                        
+                        # Check start codon (first 3 bases of CDS)
+                        if len(cds_seq) >= 3:
+                            start_codon = cds_seq[:3].upper()
+                            if start_codon != 'ATG':
+                                gff_flags[transcript_id].append('invalid_start_codon')
+                        
+                        # Check stop codon (last 3 bases of CDS)
+                        if len(cds_seq) >= 3:
+                            stop_codon = cds_seq[-3:].upper()
+                            if stop_codon not in {'TAA', 'TAG', 'TGA'}:
+                                gff_flags[transcript_id].append('invalid_stop_codon')
+                    else:
+                        gff_flags[transcript_id].append('no_CDS')
+                        
+        return gff_flags
+
+gff_file = r"C:\Users\jtspy\Desktop\Python\BCPyAssessment\PlasmoDB-54_Pfalciparum3D7.gff"
+db_path = gff_file.replace('.gff', '.db').replace('.gff3', '.db').replace('.gff.gz', '.db')
+db = gffutils.create_db(gff_file, dbfn=db_path, force=True, keep_order=True)
+fasta_file = r"C:\Users\jtspy\Desktop\Python\BCPyAssessment\PlasmoDB-54_Pfalciparum3D7_Genome.fasta"
+fasta_checker = FastaChecker(fasta_file)
+fasta = fasta_checker.fasta_parse()
+qc = QC_flags(db, fasta)
+results = qc.gff_QC()
+print(results)             
