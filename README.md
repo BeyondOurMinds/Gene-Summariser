@@ -8,7 +8,7 @@ A command-line tool to summarize gene models and output basic GC metrics.
 
 ## Installation
 
-Conda Installer : 
+### Conda Installer : 
 1. Create and activate the conda environment:
 ```bash
 conda env create -f environment.yml
