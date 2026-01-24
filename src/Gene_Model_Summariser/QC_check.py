@@ -151,6 +151,9 @@ class QC_flags:
                             stop_codon = cds_seq[-3:].upper()
                             if stop_codon not in {'TAA', 'TAG', 'TGA'}:
                                 gff_flags[transcript_id].append('invalid_stop_codon')
+                        
+                        if len(cds_seq) < 3:
+                            gff_flags[transcript_id].append('CDS_too_short')
                     else:
                         gff_flags[transcript_id].append('no_CDS')
                         
