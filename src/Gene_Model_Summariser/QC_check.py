@@ -53,9 +53,8 @@ class QC_flags:
         return results
     
     
-    def gff_QC(self) -> None:
+    def gff_QC(self) -> dict[str, list[str]]:
         model = GFF_Parser(self.db).transcript_model()
-        has_cds = False
         gff_flags = {}
         for transcript_id, features in model.items():
             gff_flags[transcript_id] = []
@@ -71,4 +70,5 @@ class QC_flags:
                     overlaps = 'overlapping_exons'
                     gff_flags[transcript_id].append(overlaps)
                     break
+        return gff_flags
                         
