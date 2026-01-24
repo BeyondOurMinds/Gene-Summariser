@@ -51,3 +51,8 @@ class QC_flags:
                 'n_percent': n_percent
             }
         return results
+    
+    def gff_QC(self) -> None:
+        model = GFF_Parser(self.db).transcript_model()
+        
+        pass
