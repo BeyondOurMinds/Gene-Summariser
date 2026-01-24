@@ -1,7 +1,14 @@
 import gffutils
 from typing import Optional
 from Bio.Seq import Seq
-from .gff_parser import GFF_Parser
+
+# For testing: use absolute imports
+try:
+    from .gff_parser import GFF_Parser
+    from .fasta_validator import FastaChecker
+except ImportError:
+    from gff_parser import GFF_Parser
+    from fasta_validator import FastaChecker
 
 class QC_flags:
     # Class to generate QC flags for gene models from parser data
@@ -53,19 +60,11 @@ class QC_flags:
             }
         return results
     
-    def CDS_start_codon_check(self, sequence: str, cds_start, cds_end) -> bool:
-        # Function to check if the CDS starts with a valid start codon (ATG)
-        if not sequence or cds_start is None or cds_end is None:
+    def contains_N(self, sequence: str) -> bool:
+        # Function to check if a sequence contains 'N' bases
+        if not sequence:
             return False
-        start_codon = sequence[cds_start-1:cds_start+2].upper()  # Adjust for 0-based indexing
-        return start_codon == 'ATG'
-
-    def CDS_stop_codon_check(self, sequence: str, cds_start, cds_end) -> bool:
-        # Function to check if the CDS ends with a valid stop codon (TAA, TAG, TGA)
-        if not sequence or cds_start is None or cds_end is None:
-            return False
-        stop_codon = sequence[cds_end-3:cds_end].upper()  # Adjust for 0-based indexing
-        return stop_codon in {'TAA', 'TAG', 'TGA'}
+        return 'N' in sequence.upper()
     
     def gff_QC(self) -> dict[str, list[str]]:
         model = GFF_Parser(self.db).transcript_model()
@@ -86,24 +85,34 @@ class QC_flags:
                     break
             '''checking CDS start codon'''
             if self.fasta:
-                chrom_id = features['gene'].chrom
+                # Get gene feature from database using gene ID
+                gene_id = features['gene']
+                gene_feature = self.db[gene_id]
+                chrom_id = gene_feature.seqid
                 seq_record = self.fasta.get(chrom_id)
                 if seq_record:
                     sequence = str(seq_record.seq)
-                    strand = seq_record.strand
+                    strand = gene_feature.strand
                     if strand == '-':
                         sequence = str(Seq(sequence).reverse_complement())
                     if features['CDS(s)']:
-                        cds_count = 1
+                        cds_seq = ''
                         for feature in features['CDS(s)']:
                             cds_start = feature.start
                             cds_end = feature.end
-                            if not self.CDS_start_codon_check(sequence, cds_start, cds_end):
-                                start_codon_flag = f'invalid_start_codon'
-                                gff_flags[transcript_id].append(start_codon_flag)
-                            if not self.CDS_stop_codon_check(sequence, cds_start, cds_end):
-                                stop_codon_flag = f'invalid_stop_codon'
-                                gff_flags[transcript_id].append(stop_codon_flag)
-                            cds_count += 1             
+                            cds_seq += sequence[cds_start-1:cds_end]
+                            if self.contains_N(cds_seq):
+                                n_in_cds = 'N_in_CDS'
+                                gff_flags[transcript_id].append(n_in_cds)            
         return gff_flags
+
+gff_file = r'C:\Users\jtspy\Desktop\Python\BCPyAssessment\PlasmoDB-54_Pfalciparum3D7.gff'
+db_path = gff_file.replace('.gff', '.db')
+db = gffutils.create_db(gff_file, dbfn=db_path, force=True, keep_order=True)
+fasta_file = r'C:\Users\jtspy\Desktop\Python\BCPyAssessment\PlasmoDB-54_Pfalciparum3D7_Genome.fasta'
+fasta_checker = FastaChecker(fasta_file)
+fasta = fasta_checker.fasta_parse()
+qc = QC_flags(db, fasta)
+results = qc.gff_QC()
+print(results)
                         

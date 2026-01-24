@@ -8,7 +8,10 @@ class GFF_Parser:
 
     def get_genes(self) -> list[gffutils.Feature]:
         """Retrieve all gene features from the GFF database."""
+        # Try common gene feature types
         genes = list(self.db.features_of_type('gene'))
+        if not genes:
+            genes = list(self.db.features_of_type('protein_coding_gene'))
         return genes
     
     def get_transcripts(self, gene_id: str) -> list[gffutils.Feature]:
