@@ -23,7 +23,6 @@ def main(gff_file: str, fasta_file: Optional[str] = None, output_dir: str = ".")
     logger = setup_logger("gene_model_summariser.log")
     if db_check:
         tsv_results = GFF_Parser(db).tsv_output()
-        transcript_models = GFF_Parser(db).transcript_model()
         if fasta_file:
             fasta_checker = FastaChecker(fasta_file)
             if not fasta_checker.validate_fasta():
@@ -33,8 +32,9 @@ def main(gff_file: str, fasta_file: Optional[str] = None, output_dir: str = ".")
             results = QC_flags(db, fasta).gff_QC()
         else:
             results = QC_flags(db).gff_QC()
-        
         output_results(tsv_results, results, output_dir)
+    else:
+        logger.error("GFF database validation failed. Exiting.")
 
 # Join tsv_results and results on transcript IDs for output in singular results.tsv file. 
 def output_results(tsv_data: dict, qc_data: dict, output_dir: str) -> None:
