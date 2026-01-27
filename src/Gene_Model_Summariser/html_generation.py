@@ -44,9 +44,9 @@ def generate_html_report(tsv_output: dict) -> str:
 
 def load_pillar1_outputs(pillar1_dir: Path) -> tuple[pd.DataFrame, dict]:
     
-    pillar1_dir = Path(pillar1_dir) #ensure pillar1_dir is a Path object
+    output_dir = Path(output_dir) #ensure pillar1_dir is a Path object
 
-    tsv_path = pillar1_dir / "transcript_summary.tsv" #construct the full path to the transcript summary TSV file
+    tsv_path = output_dir / "results.tsv" #construct the full path to the transcript summary TSV file
     
     json_path = pillar1_dir / "run.json" #construct the full path to the run.JSON file
 
@@ -273,7 +273,6 @@ def compute_report_stats(df: pd.DataFrame) -> dict:
     return report_stats
 
 
-
 #used to save the report figures
 #takes in the data from the report_stats and majke the output folder for the figures for the HTML to embed them
 def save_report_figures(plot_inputs: dict, output_dir: Path) -> dict[str, str]:
@@ -304,4 +303,20 @@ def save_report_figures(plot_inputs: dict, output_dir: Path) -> dict[str, str]:
         "transcripts_per_gene_plot": transcripts_per_gene_plot_filename,
         "flagged_vs_unflagged_plot": flagged_vs_unflagged_plot_filename,
         "qc_flags_per_transcript_plot": qc_flags_plot_filename}
+
+#####################################################################################################################
+#Once all built in Python, put into data dictionary in Jinja2 format
+####################################################################################################################
+
+def build_report_data(report_stats: dict, figures: dict) -> dict:
+    return {
+        "summary_metrics_table": report_stats["summary_metrics_table"],# summary metrics table
+        "figures": figures,# figure filenames for embedding
+        "artefacts": {
+            "results_tsv": "results.tsv", #link to results.tsv 
+            "run_json": "run.json", #link to run_json
+        },
+    }
+
+
 
