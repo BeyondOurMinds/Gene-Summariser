@@ -77,7 +77,7 @@ class QC_flags:
         return False
     
     def cds_start(self, cds_seq: str) -> bool:
-        """Returns the start codon (first 3 bases) of the CDS sequence."""
+        """Returns True if the CDS sequence starts with 'ATG', otherwise False."""
         start_atg = True
         if len(cds_seq) >= 3:
             start_codon = cds_seq[:3].upper()
@@ -86,6 +86,9 @@ class QC_flags:
         return start_atg
     
     def cds_stop(self, cds_seq: str) -> bool:
+        """
+        returns True if the CDS sequence ends with a valid stop codon (TAA, TAG, TGA), otherwise False.
+        """
         stop_codon = True
         if len(cds_seq) >= 3:
             end_codon = cds_seq[-3:].upper()
