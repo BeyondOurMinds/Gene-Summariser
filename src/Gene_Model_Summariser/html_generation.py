@@ -237,42 +237,34 @@ def plot_qc_flag_counts_per_transcript(flag_counts: dict[str, int], outpath: Pat
 #putting it all together
 #load -> compute -> save plots -> build report data
 ####################################################################################################################################################################################
-if __name__ == "__main__":
-    # 1) Load Pillar 1 outputs
-    pillar1_dir = Path("path/to/pillar1_outputs") #this needs changed to include Johns output for the pillar1_dir (will check when finished)
-    df, run_info = load_pillar1_outputs(pillar1_dir)
-
-    # 2) Compute plot data
-    exon_count_distribution = compute_exon_count_for_histogram(df)
-    transcripts_per_gene_distribution = compute_transcripts_per_gene_distribution(df)
-    flagged_vs_unflagged_counts = compute_flagged_vs_unflagged(df)
-    qc_flag_counts_per_transcript = compute_qc_flag_count_per_transcript(df)
-    metrics = compute_summary_metrics(df)
-    metrics_table = summary_metrics_table(metrics).to_dict(orient="records") 
+#make the output directory flexible when using conda/docker env - take in the same env from main() for the results.tsv output directory 
+def load_results_tsv(output_dir: str | Path) -> pd.DataFrame:
+    output_dir = Path(output_dir)
+    return pd.read_csv(output_dir / "results.tsv", sep="\t")
 
 
-    # 3) Make a figures directory + save plots into the directory 
-    figures_dir = pillar1_dir / "figures" 
-    figures_dir.mkdir(parents=True, exist_ok=True)
+#function to run functions and save the data to a dictionary to be extracted for plotting
+#also built the table for the HTML file 
+def compute_report_stats(df: pd.DataFrame) -> dict:
+    #summary numbers for the report
+    summary_metrics = compute_summary_metrics(df)
+    summary_metrics_table = summary_metrics_table(summary_metrics).to_dict(orient="records")
 
-    exon_count_distribution_plot_file = plot_exon_count_histogram(exon_count_distribution, figures_dir / "exon_count_distribution.png")
-    transcript_per_gene_plot_file = plot_transcripts_per_gene_distribution(transcripts_per_gene_distribution, figures_dir / "transcripts_per_gene_distribution.png")
-    flagged_plot_file = plot_flagged_vs_unflagged(flagged_vs_unflagged_counts, figures_dir / "flagged_vs_unflagged.png")
-    qc_per_transcript_plot_file = plot_qc_flag_counts_per_transcript(qc_flag_counts_per_transcript, figures_dir / "qc_flags_per_transcript.png")
+    #data needed to make each plot
+    exon_count_histogram_data = compute_exon_count_for_histogram(df)
+    transcripts_per_gene_bar_data = compute_transcripts_per_gene_distribution(df)
+    flagged_vs_unflagged_bar_data = compute_flagged_vs_unflagged(df)
+    qc_flag_counts_per_transcript_data = compute_qc_flag_count_per_transcript(df)
 
-    # 4) Build the dictionary that Jinja2 will use
-    report_data = {
-        "run_info": run_info,
-        "metrics": metrics,
-        "metrics_table": metrics_table,
-        "plots": {
-            "exon_count": exon_count_distribution_plot_file,
-            "transcripts_per_gene": transcript_per_gene_plot_file,
-            "flagged_vs_unflagged": flagged_plot_file,
-            "qc_flags_per_transcript": qc_per_transcript_plot_file,
-        },
-    }
+    #package everything into one dictionary
+    report_stats = {}
+    report_stats["summary_metrics"] = summary_metrics
+    report_stats["summary_metrics_table"] = summary_metrics_table
 
-    # 5) Render + write HTML
-    html = generate_html_report(report_data)
-    (pillar1_dir / "report.html").write_text(html, encoding="utf-8")
+    report_stats["plot_inputs"] = {}
+    report_stats["plot_inputs"]["exon_count_histogram_data"] = exon_count_histogram_data
+    report_stats["plot_inputs"]["transcripts_per_gene_bar_data"] = transcripts_per_gene_bar_data
+    report_stats["plot_inputs"]["flagged_vs_unflagged_bar_data"] = flagged_vs_unflagged_bar_data
+    report_stats["plot_inputs"]["qc_flag_counts_per_transcript_data"] = qc_flag_counts_per_transcript_data
+
+    return report_stats
