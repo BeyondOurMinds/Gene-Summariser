@@ -91,7 +91,7 @@ This program makes a few assumptions when processing QC flags that should be con
 1. Only accepts ATG as a valid start codon
    * will flag as invalid_start_codon if a different start codon is used
 2. Terminal CDS must end in a stop codon
-   *If the terminal CDS does not end in a stop codon, it will be flagged as invalid_stop_codon
+   * If the terminal CDS does not end in a stop codon, it will be flagged as invalid_stop_codon
 3. Assumes phase values are correct within the GFF file
    * If the phase value is incorrect or incomplete, this will affect the previous flags
 Violations of these assumptions are recorded as QC flags but may reflect annotation conventions rather than biological errors
