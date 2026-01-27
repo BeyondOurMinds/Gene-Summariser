@@ -84,7 +84,7 @@ def generate_html_report(tsv_output: dict) -> str:
     return df, run_info 
 
     def compute_summary_metrics(df: pd.DataFrame) -> dict:
-    
+    # Function to compute summary metrics from the transcript summary DataFrame
     total_genes = int(df["gene_id"].nunique()) #calculate the total number of unique gene IDs
     total_transcripts = int(len(df)) #calculate the total number of transcripts (rows in the DataFrame)
     
@@ -101,9 +101,20 @@ def generate_html_report(tsv_output: dict) -> str:
     # calculate percentage of transcripts with QC flags (flags column not empty)
     flagged_transcripts_count = int(df[df["flags"].notna() & (df["flags"] != "")].shape[0]) #count transcripts with non-empty flags
     flagged_transcripts_percent = (flagged_transcripts_count / total_transcripts) * 100 if total_transcripts > 0 else 0.0 #calculate percentage of flagged transcripts
+    
+    return {
+        "total_genes": total_genes,
+        "total_transcripts": total_transcripts,
+        "transcript_mean": transcript_mean,                 
+        "transcript_median": transcript_median,
+        "transcript_max": transcript_max,
+        "has_cds_count": has_cds_count,
+        "has_cds_percent": has_cds_percent,
+        "flagged_transcripts_count": flagged_transcripts_count,
+        "flagged_transcripts_percent": flagged_transcripts_percent,
+    }
 
-
-
+    
 
 
 
