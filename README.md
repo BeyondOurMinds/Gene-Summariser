@@ -102,9 +102,7 @@ docker run -v $(pwd):/data beyondourminds/gene-summariser:latest -g /data/gffFil
 ```
 
 ### For help and available options:
-```bash
-GroupB-tool --help
-```
+run tool with no provided arguments, or provide the --help command
 
 ## Dependencies
 
