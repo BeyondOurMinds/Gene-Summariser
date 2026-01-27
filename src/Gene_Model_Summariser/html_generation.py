@@ -14,27 +14,27 @@ import matplotlib.pyplot as plt
 #function used to generate the HTML report using Jinja2 templating
 ############################################################################################################################################################################################
 #the function to generate the HTML report using Jinja2 templating (will be saved into a separate HTML generation file(groupB.html.j2) once finalised)
-def generate_html_report(tsv_output: dict) -> str:  
+def generate_html_report(report_data: dict) -> str:  
     # tsv_output will be renamed once Pillar 1 tsv_output dict is finished and finalised
 
     # Get the directory of the current file and set as template folder for Jinja2
-    pillar3_folder = Path(__file__).resolve().parent  
+    output_dir = Path(__file__).resolve().parent  
 
     # Set up Jinja2 environment from the folder
     env = Environment(
-        loader=FileSystemLoader(str(pillar3_folder)),
+        loader=FileSystemLoader(str(output_dir)),
         autoescape=select_autoescape(["html", "xml"]),
     )
 
-    # Load the HTML template file from the pillar3 folder
+    # Load the HTML template file from the output_dir folder
     template_name = "groupB.html.j2"
     try:
         template = env.get_template(template_name)
     except Exception as e:
-        raise FileNotFoundError(f"Could not find template '{template_name}' in {pillar3_folder}") from e
+        raise FileNotFoundError(f"Could not find template '{template_name}' in {output_dir}") from e
 
     # tsv_output will be available in Jinja as {{ data }}
-    html_output = template.render(data=tsv_output)
+    html_output = template.render(data=report_data)
 
     return html_output
 
@@ -42,24 +42,35 @@ def generate_html_report(tsv_output: dict) -> str:
 #building a function to open and extract data from tsv and json files
 ####################################################################################################################################################################################
 
-def load_pillar1_outputs(pillar1_dir: Path) -> tuple[pd.DataFrame, dict]:
-    
-    pillar1_dir = Path(pillar1_dir) #ensure pillar1_dir is a Path object
+def load_outputs(output_dir: str | Path) -> tuple[pd.DataFrame, dict]:
+    output_dir = Path(output_dir)
 
-    tsv_path = pillar1_dir / "transcript_summary.tsv" #construct the full path to the transcript summary TSV file
-    
-    json_path = pillar1_dir / "run.json" #construct the full path to the run.JSON file
+    tsv_path = output_dir / "results.tsv"
+    json_path = output_dir / "run.json"
 
-    df = pd.read_csv(tsv_path, sep="\t") #read the transcript summary TSV into a pandas DataFrame
+    if not tsv_path.exists():
+        raise FileNotFoundError(f"Missing transcript summary TSV: {tsv_path}")
+    if not json_path.exists():
+        raise FileNotFoundError(f"Missing run metadata JSON: {json_path}")
 
-    run_info = json.loads(json_path.read_text(encoding="utf-8")) #load the contents of run.json into a Python dictionary
-    return df, run_info 
+    df = pd.read_csv(tsv_path, sep="\t")
+
+    required = {"gene_id","transcript_id","has_cds","flags","exon_count"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"results.tsv missing columns: {sorted(missing)}")
+
+
+    with json_path.open("r", encoding="utf-8") as f:
+        run_info = json.load(f)
+
+    return df, run_info
 
 ####################################################################################################################################################################################
 #functions to compute various metrics from the transcript summary DataFrame
 ####################################################################################################################################################################################
 
-    #function to compute summary metrics from the transcript summary DataFrame
+#function to compute summary metrics from the transcript summary DataFrame
 def compute_summary_metrics(df: pd.DataFrame) -> dict:
     # Function to compute summary metrics from the transcript summary DataFrame
     total_genes = int(df["gene_id"].nunique()) #calculate the total number of unique gene IDs
@@ -76,8 +87,10 @@ def compute_summary_metrics(df: pd.DataFrame) -> dict:
     has_cds_percent = (has_cds_count / total_transcripts) * 100 if total_transcripts > 0 else 0.0 #calculate percentage of transcripts with has_cds = true
 
     # calculate percentage of transcripts with QC flags (flags column not empty)
-    flagged_transcripts_count = int(df[df["flags"].notna() & (df["flags"] != "")].shape[0]) #count transcripts with non-empty flags
-    flagged_transcripts_percent = (flagged_transcripts_count / total_transcripts) * 100 if total_transcripts > 0 else 0.0 #calculate percentage of flagged transcripts
+    flags_clean = df["flags"].fillna("").astype(str).str.strip() #clean flags to make sure stripped of white space and remove any NANs with '' for counting
+    flagged_transcripts_count = int((flags_clean != "").sum()) #count flags
+    flagged_transcripts_percent = (flagged_transcripts_count / total_transcripts) * 100 if total_transcripts > 0 else 0.0
+
     
     return {
         "total_genes": total_genes,
@@ -135,7 +148,7 @@ def compute_transcripts_per_gene_distribution(df: pd.DataFrame) -> dict[int, int
 
 #function to compute counts of flagged vs unflagged transcripts
 def compute_flagged_vs_unflagged(df: pd.DataFrame) -> dict[str, int]:
-    flags_clean = df["flags"].astype(str).str.strip() #clean flags column by converting to string and stripping whitespace
+    flags_clean = df["flags"].fillna("").astype(str).str.strip() #clean flags column by converting to string and stripping whitespace
     flagged = int((flags_clean != "").sum()) #count transcripts with non-empty flags
     unflagged = int(len(df) - flagged) #calculate unflagged transcripts by subtracting flagged from total
     return {"flagged": flagged, "unflagged": unflagged} #return the counts as a dictionary
@@ -247,19 +260,20 @@ def load_results_tsv(output_dir: str | Path) -> pd.DataFrame:
 #also built the table for the HTML file 
 def compute_report_stats(df: pd.DataFrame) -> dict:
     #summary numbers for the report
-    summary_metrics = compute_summary_metrics(df)
-    summary_metrics_table = summary_metrics_table(summary_metrics).to_dict(orient="records")
+    metrics = compute_summary_metrics(df)
+    metrics_table_records = summary_metrics_table(metrics).to_dict(orient="records")
 
     #data needed to make each plot
     exon_count_histogram_data = compute_exon_count_for_histogram(df)
     transcripts_per_gene_bar_data = compute_transcripts_per_gene_distribution(df)
+
     flagged_vs_unflagged_bar_data = compute_flagged_vs_unflagged(df)
     qc_flag_counts_per_transcript_data = compute_qc_flag_count_per_transcript(df)
 
     #package everything into one dictionary
     report_stats = {}
-    report_stats["summary_metrics"] = summary_metrics
-    report_stats["summary_metrics_table"] = summary_metrics_table
+    report_stats["summary_metrics"] = metrics
+    report_stats["summary_metrics_table"] = metrics_table_records
 
     report_stats["plot_inputs"] = {}
     report_stats["plot_inputs"]["exon_count_histogram_data"] = exon_count_histogram_data
@@ -299,5 +313,18 @@ def save_report_figures(plot_inputs: dict, output_dir: Path) -> dict[str, str]:
         "exon_count_plot": exon_count_plot_filename,
         "transcripts_per_gene_plot": transcripts_per_gene_plot_filename,
         "flagged_vs_unflagged_plot": flagged_vs_unflagged_plot_filename,
-        "qc_flags_per_transcript_plot": qc_flags_plot_filename,
+        "qc_flags_per_transcript_plot": qc_flags_plot_filename}
+
+#####################################################################################################################
+#Once all built in Python, put into data dictionary in Jinja2 format
+####################################################################################################################
+
+def build_report_data(report_stats: dict, figures: dict) -> dict:
+    return {
+        "summary_metrics_table": report_stats["summary_metrics_table"],# summary metrics table
+        "figures": figures,# figure filenames for embedding
+        "artefacts": {
+            "results_tsv": "results.tsv", #link to results.tsv 
+            "run_json": "run.json", #link to run_json
+        }
     }
