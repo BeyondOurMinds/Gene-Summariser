@@ -114,9 +114,8 @@ def summary_metrics_table(metrics: dict) -> pd.DataFrame:
 def compute_exon_count_for_histogram(df: pd.DataFrame) -> dict[int, int]: 
     # Function to compute the distribution of exon counts from the transcript summary DataFrame
     exon_count_distribution = {}  #dictionary to hold counts of each exon count
-
-    for n_exons in df["n_exons"].dropna():  #iterate over non-null exon counts in the DataFrame
-        exon_count = int(n_exons)  #convert exon count to integer
+    for count_exon in df["exon_count"].dropna():  #iterate over non-null exon counts in the DataFrame
+        exon_count = int(count_exon)  #make sure exon_count is an integer
         exon_count_distribution[exon_count] = exon_count_distribution.get(exon_count, 0) + 1  #increment the count for this exon count
 
     return exon_count_distribution  #return the dictionary of exon count distribution
@@ -171,7 +170,7 @@ def compute_qc_flag_count_per_transcript(df: pd.DataFrame) -> dict[str, int]:
 ####################################################################################################################################################################################
 
 #function to plot transcripts per gene distribution bar chart
-def plot_exon_count_histogram(exon_count_distribution: dict[int, int]) -> None:
+def plot_exon_count_histogram(exon_count_distribution: dict[int, int], outpath: Path) -> str:
     exon_counts = sorted(exon_count_distribution.keys()) #sorted list of exon counts
     transcript_counts = [exon_count_distribution[x] for x in exon_counts] #corresponding transcript counts
 
@@ -182,11 +181,13 @@ def plot_exon_count_histogram(exon_count_distribution: dict[int, int]) -> None:
     plt.title("Exon count distribution") #set chart title
     plt.xticks(exon_counts)  # show each exon count on the x-axis (long labels in horizontal will disrupt the chart)
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show() #display the plot
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
+    return outpath.name  # return image filename for embedding in HTML
 
 
 #function to plot transcripts per gene distribution bar chart
-def plot_transcripts_per_gene_distribution(distribution: dict[int, int]) -> None:
+def plot_transcripts_per_gene_distribution(distribution: dict[int, int], outpath: Path) -> str:
     transcripts_per_gene = sorted(distribution.keys()) #sorted list of transcripts per gene counts
     gene_counts = [distribution[x] for x in transcripts_per_gene] #corresponding gene counts
 
@@ -197,10 +198,12 @@ def plot_transcripts_per_gene_distribution(distribution: dict[int, int]) -> None
     plt.title("Transcripts per gene distribution") #set chart title
     plt.xticks(transcripts_per_gene)  # show each integer count on the x-axis (long labels in horizontal will disrupt the chart)
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show() #display the plot
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
+    return outpath.name  # return image filename for embedding in HTML
 
 #function to plot flagged vs unflagged transcripts bar chart
-def plot_flagged_vs_unflagged(counts: dict[str, int]) -> None:
+def plot_flagged_vs_unflagged(counts: dict[str, int], outpath: Path) -> str:
     labels = ["flagged", "unflagged"] #labels for the two categories
     values = [counts["flagged"], counts["unflagged"]] #corresponding counts
 
@@ -210,10 +213,12 @@ def plot_flagged_vs_unflagged(counts: dict[str, int]) -> None:
     plt.ylabel("Number of transcripts") #label y-axis
     plt.title("Flagged vs unflagged transcripts") #set chart title
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show()#display the plot
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
+    return outpath.name  # return image filename for embedding in HTML
 
 #function to plot qc flag counts per transcript bar chart
-def plot_qc_flag_counts_per_transcript(flag_counts: dict[str, int]) -> None:
+def plot_qc_flag_counts_per_transcript(flag_counts: dict[str, int], outpath: Path) -> str:
     flags = QC_FLAG_NAMES  # fixed order from your definitions
     counts = [flag_counts.get(f, 0) for f in flags] # corresponding counts
 
@@ -224,32 +229,75 @@ def plot_qc_flag_counts_per_transcript(flag_counts: dict[str, int]) -> None:
     plt.title("QC flag counts (unique per transcript)") #set chart title
     plt.xticks(rotation=45, ha="right") #rotate x-axis labels for readability (long labels in horizontal will disrupt the chart)
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show() #display the plot 
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
+    return outpath.name  # return image filename for embedding in HTML
 
 ####################################################################################################################################################################################
-#putting it all together (calling the functions)
+#putting it all together
+#load -> compute -> save plots -> build report data
 ####################################################################################################################################################################################
-# 1) Load Pillar 1 outputs
-pillar1_dir = Path("path/to/pillar1_outputs") #this needs changed to include Johns output for the pillar1_dir (will check when finished)
-df, run_info = load_pillar1_outputs(pillar1_dir)
-
-# 2) Compute plot data
-exon_count_distribution = compute_exon_count_for_histogram(df)
-transcripts_per_gene_distribution = compute_transcripts_per_gene_distribution(df)
-flagged_vs_unflagged_counts = compute_flagged_vs_unflagged(df)
-qc_flag_counts_per_transcript = compute_qc_flag_count_per_transcript(df)
-
-# 3) Produce the plots
-plot_exon_count_histogram(exon_count_distribution)
-plot_transcripts_per_gene_distribution(transcripts_per_gene_distribution)
-plot_flagged_vs_unflagged(flagged_vs_unflagged_counts)
-plot_qc_flag_counts_per_transcript(qc_flag_counts_per_transcript) 
+#make the output directory flexible when using conda/docker env - take in the same env from main() for the results.tsv output directory 
+def load_results_tsv(output_dir: str | Path) -> pd.DataFrame:
+    output_dir = Path(output_dir)
+    return pd.read_csv(output_dir / "results.tsv", sep="\t")
 
 
+#function to run functions and save the data to a dictionary to be extracted for plotting
+#also built the table for the HTML file 
+def compute_report_stats(df: pd.DataFrame) -> dict:
+    #summary numbers for the report
+    summary_metrics = compute_summary_metrics(df)
+    summary_metrics_table = summary_metrics_table(summary_metrics).to_dict(orient="records")
+
+    #data needed to make each plot
+    exon_count_histogram_data = compute_exon_count_for_histogram(df)
+    transcripts_per_gene_bar_data = compute_transcripts_per_gene_distribution(df)
+    flagged_vs_unflagged_bar_data = compute_flagged_vs_unflagged(df)
+    qc_flag_counts_per_transcript_data = compute_qc_flag_count_per_transcript(df)
+
+    #package everything into one dictionary
+    report_stats = {}
+    report_stats["summary_metrics"] = summary_metrics
+    report_stats["summary_metrics_table"] = summary_metrics_table
+
+    report_stats["plot_inputs"] = {}
+    report_stats["plot_inputs"]["exon_count_histogram_data"] = exon_count_histogram_data
+    report_stats["plot_inputs"]["transcripts_per_gene_bar_data"] = transcripts_per_gene_bar_data
+    report_stats["plot_inputs"]["flagged_vs_unflagged_bar_data"] = flagged_vs_unflagged_bar_data
+    report_stats["plot_inputs"]["qc_flag_counts_per_transcript_data"] = qc_flag_counts_per_transcript_data
+
+    return report_stats
 
 
+#used to save the report figures
+#takes in the data from the report_stats and majke the output folder for the figures for the HTML to embed them
+def save_report_figures(plot_inputs: dict, output_dir: Path) -> dict[str, str]:
+    # Create a folder called "figures" inside the output directory
+    figures_dir = output_dir / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True) 
 
+    #Plot 1: Exon count distribution - make the plot and save it as a .png 
+    exon_count_plot_filename = plot_exon_count_histogram(plot_inputs["exon_count_histogram_data"],
+        figures_dir / "exon_count_distribution.png")
 
+    #Plot 2: Transcripts per gene distribution - make the plot and save it as a .png  
+    transcripts_per_gene_plot_filename = plot_transcripts_per_gene_distribution(plot_inputs["transcripts_per_gene_bar_data"],
+        figures_dir / "transcripts_per_gene_distribution.png")
 
+    #Plot 3: Flagged vs unflagged transcripts -make the plot and save it as a .png 
+    flagged_vs_unflagged_plot_filename = plot_flagged_vs_unflagged(plot_inputs["flagged_vs_unflagged_bar_data"],
+        figures_dir / "flagged_vs_unflagged.png")
 
+    #Plot 4: QC flags for one count per transcript - make the plot and save it as a .png
+    qc_flags_plot_filename = plot_qc_flag_counts_per_transcript(plot_inputs["qc_flag_counts_per_transcript_data"],
+        figures_dir / "qc_flags_per_transcript.png")
 
+    #return the image filenames - these are saved to the same root directory as the results.tsv but in a seperate directory
+    #these figs will then be embedded into the HTML file 
+    return {
+        "exon_count_plot": exon_count_plot_filename,
+        "transcripts_per_gene_plot": transcripts_per_gene_plot_filename,
+        "flagged_vs_unflagged_plot": flagged_vs_unflagged_plot_filename,
+        "qc_flags_per_transcript_plot": qc_flags_plot_filename,
+    }
