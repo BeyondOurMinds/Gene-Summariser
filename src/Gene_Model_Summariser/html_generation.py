@@ -163,5 +163,28 @@ def compute_flagged_vs_unflagged(df: pd.DataFrame) -> dict[str, int]:
     unflagged = int(len(df) - flagged) #calculate unflagged transcripts by subtracting flagged from total
     return {"flagged": flagged, "unflagged": unflagged} #return the counts as a dictionary
 
+#dictionary defining QC flag descriptions
+QC_FLAG_DEFINITIONS = {
+    "exon_count>5": "Transcript has more than 5 exons.",
+    "overlapping_exons": "At least two exons overlap in genomic coordinates.",
+    "invalid_CDS_phase": "A CDS feature has an invalid phase/frame (not 0/1/2).",
+    "N_in_CDS": "CDS sequence contains one or more 'N' bases.",
+    "ambiguous_bases_in_CDS": "CDS contains bases outside A/C/G/T/N.",
+    "CDS_not_multiple_of_3": "Total CDS length is not divisible by 3.",
+    "invalid_start_codon": "CDS does not start with ATG.",
+    "invalid_stop_codon": "CDS does not end with TAA/TAG/TGA.",
+    "CDS_too_short": "CDS length is < 3 bases.",
+    "no_CDS": "Transcript has no CDS features.",
+}
 
+QC_FLAG_NAMES = list(QC_FLAG_DEFINITIONS.keys()) #list of all QC flag names
+
+# function to count how many transcripts have each flag
+def compute_qc_flag_count_per_transcript(df: pd.DataFrame) -> dict[str, int]:
+    flag_counts: dict[str, int] = {} # dictionary to hold counts of each flag type
+    for flags in df["flags"].fillna("").astype(str): # iterate over flags, treating NaN as empty string
+        flag_set = {f.strip() for f in flags.split(",") if f.strip() != ""} # split and clean flags
+        for flag in flag_set: # count each unique flag once per transcript
+            flag_counts[flag] = flag_counts.get(flag, 0) + 1 # increment the count for this flag type
+    return flag_counts
 
