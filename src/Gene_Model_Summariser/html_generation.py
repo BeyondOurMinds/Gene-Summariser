@@ -1,9 +1,17 @@
+'''
+Docstring for Gene_Model_Summariser.html_generation
+This module contains functions to generate HTML reports from the outputs of Pillar 1 (transcript summary TSV and run.json).
+It uses Jinja2 templating to create the HTML structure and pandas to process the TSV data
+'''
+
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import pandas as pd
 import json
 
-
+####################################################################################################################################################################################
+#function used to generate the HTML report using Jinja2 templating
+############################################################################################################################################################################################
 #the function to generate the HTML report using Jinja2 templating (will be saved into a separate HTML generation file(groupB.html.j2) once finalised)
 def generate_html_report(tsv_output: dict) -> str:  
     # tsv_output will be renamed once Pillar 1 tsv_output dict is finished and finalised
@@ -22,20 +30,17 @@ def generate_html_report(tsv_output: dict) -> str:
     try:
         template = env.get_template(template_name)
     except Exception as e:
-        raise FileNotFoundError(
-            f"Could not find template '{template_name}' in {pillar3_folder}"
-        ) from e
+        raise FileNotFoundError(f"Could not find template '{template_name}' in {pillar3_folder}") from e
 
     # tsv_output will be available in Jinja as {{ data }}
     html_output = template.render(data=tsv_output)
 
     return html_output
 
+####################################################################################################################################################################################
+#building a function to open and extract data from tsv and json files
+####################################################################################################################################################################################
 
-
-    #building a function to open and extract data from tsv and json files (will be tested once these are finished)
-    #once the directory containing this information is built, i will change the path from pillar1_dir to the correct path
-            
 def load_pillar1_outputs(pillar1_dir: Path) -> tuple[pd.DataFrame, dict]:
     
     pillar1_dir = Path(pillar1_dir) #ensure pillar1_dir is a Path object
@@ -49,6 +54,9 @@ def load_pillar1_outputs(pillar1_dir: Path) -> tuple[pd.DataFrame, dict]:
     run_info = json.loads(json_path.read_text(encoding="utf-8")) #load the contents of run.json into a Python dictionary
     return df, run_info 
 
+####################################################################################################################################################################################
+#functions to compute various metrics from the transcript summary DataFrame
+####################################################################################################################################################################################
 
     #function to compute summary metrics from the transcript summary DataFrame
 def compute_summary_metrics(df: pd.DataFrame) -> dict:
@@ -81,6 +89,10 @@ def compute_summary_metrics(df: pd.DataFrame) -> dict:
         "flagged_transcripts_count": flagged_transcripts_count,
         "flagged_transcripts_percent": flagged_transcripts_percent,
     }
+
+####################################################################################################################################################################################
+#functions to compute data for visualisations from the transcript summary DataFrame
+####################################################################################################################################################################################
 
 #function to generate bar chart data for QC flag types
 def compute_qc_flag_count(df: pd.DataFrame) -> dict[str, int]: 
@@ -151,6 +163,11 @@ def compute_qc_flag_count_per_transcript(df: pd.DataFrame) -> dict[str, int]:
         for flag in flag_set: # count each unique flag once per transcript
             flag_counts[flag] = flag_counts.get(flag, 0) + 1 # increment the count for this flag type
     return flag_counts
+
+####################################################################################################################################################################################
+#functions to build visualisations from the compute data functions above
+####################################################################################################################################################################################
+
 
 
 
