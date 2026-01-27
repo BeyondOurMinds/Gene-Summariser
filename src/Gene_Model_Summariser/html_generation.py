@@ -65,10 +65,10 @@ def compute_summary_metrics(df: pd.DataFrame) -> dict:
     total_transcripts = int(len(df)) #calculate the total number of transcripts (rows in the DataFrame)
     
     # calculate transcripts per gene statistics: mean, median, maximum 
-    transcript_per_gene = df.groupby("gene_id")["transcript_id"].nunique()  #how many genes have how many transcripts
+    transcript_per_gene = df.groupby("gene_id")["transcript_id"].nunique() #how many genes have how many transcripts
     transcript_mean = float(transcript_per_gene.mean()) if len(transcript_per_gene) else 0.0 #calculate mean transcripts per gene
     transcript_median = float(transcript_per_gene.median()) if len(transcript_per_gene) else 0.0 #calculate median transcripts per gene
-    transcript_max = int(transcript_per_gene.max()) if len(transcript_per_gene) else 0.0 #calculate maximum transcripts per gene
+    transcript_max = int(transcript_per_gene.max()) if len(transcript_per_gene) else 0 #calculate maximum transcripts per gene
 
     # calculate percentage of transcripts with has_cds = true
     has_cds_count = int(df["has_cds"].sum()) #count how many transcripts have has_cds = true
@@ -89,6 +89,21 @@ def compute_summary_metrics(df: pd.DataFrame) -> dict:
         "flagged_transcripts_count": flagged_transcripts_count,
         "flagged_transcripts_percent": flagged_transcripts_percent,
     }
+
+#function to create a summary metrics table DataFrame from the computed metrics 
+def summary_metrics_table(metrics: dict) -> pd.DataFrame:
+    rows = [
+        ("Total genes", metrics["total_genes"]),
+        ("Total transcripts", metrics["total_transcripts"]),
+        ("Mean transcripts per gene", metrics["transcript_mean"]),
+        ("Median transcripts per gene", metrics["transcript_median"]),
+        ("Max transcripts per gene", metrics["transcript_max"]),
+        ("Transcripts with CDS (count)", metrics["has_cds_count"]),
+        ("Transcripts with CDS (%)", metrics["has_cds_percent"]),
+        ("Flagged transcripts (count)", metrics["flagged_transcripts_count"]),
+        ("Flagged transcripts (%)", metrics["flagged_transcripts_percent"]),
+    ]
+    return pd.DataFrame(rows, columns=["metric", "value"]) 
 
 ####################################################################################################################################################################################
 #functions to compute data for visualisations from the transcript summary DataFrame
