@@ -182,7 +182,8 @@ def plot_exon_count_histogram(exon_count_distribution: dict[int, int]) -> None:
     plt.title("Exon count distribution") #set chart title
     plt.xticks(exon_counts)  # show each exon count on the x-axis (long labels in horizontal will disrupt the chart)
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show() #display the plot
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
     return outpath.name  # return image filename for embedding in HTML
 
 
@@ -198,7 +199,8 @@ def plot_transcripts_per_gene_distribution(distribution: dict[int, int]) -> None
     plt.title("Transcripts per gene distribution") #set chart title
     plt.xticks(transcripts_per_gene)  # show each integer count on the x-axis (long labels in horizontal will disrupt the chart)
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show() #display the plot
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
     return outpath.name  # return image filename for embedding in HTML
 
 #function to plot flagged vs unflagged transcripts bar chart
@@ -212,7 +214,8 @@ def plot_flagged_vs_unflagged(counts: dict[str, int]) -> None:
     plt.ylabel("Number of transcripts") #label y-axis
     plt.title("Flagged vs unflagged transcripts") #set chart title
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show()#display the plot
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
     return outpath.name  # return image filename for embedding in HTML
 
 #function to plot qc flag counts per transcript bar chart
@@ -227,7 +230,8 @@ def plot_qc_flag_counts_per_transcript(flag_counts: dict[str, int]) -> None:
     plt.title("QC flag counts (unique per transcript)") #set chart title
     plt.xticks(rotation=45, ha="right") #rotate x-axis labels for readability (long labels in horizontal will disrupt the chart)
     plt.tight_layout() #adjust layout to prevent clipping
-    plt.show() #display the plot 
+    plt.savefig(outpath, dpi=200) #save the figure 
+    plt.close() #close the file and return 
     return outpath.name  # return image filename for embedding in HTML
 
 ####################################################################################################################################################################################
@@ -244,13 +248,8 @@ transcripts_per_gene_distribution = compute_transcripts_per_gene_distribution(df
 flagged_vs_unflagged_counts = compute_flagged_vs_unflagged(df)
 qc_flag_counts_per_transcript = compute_qc_flag_count_per_transcript(df)
 
-# 3) Produce the plots
-plot_exon_count_histogram(exon_count_distribution)
-plot_transcripts_per_gene_distribution(transcripts_per_gene_distribution)
-plot_flagged_vs_unflagged(flagged_vs_unflagged_counts)
-plot_qc_flag_counts_per_transcript(qc_flag_counts_per_transcript) 
 
-# 4) Make a figures directory + save plots into the directory 
+# 3) Make a figures directory + save plots into the directory 
 figures_dir = pillar1_dir / "figures" 
 figures_dir.mkdir(parents=True, exist_ok=True)
 
@@ -258,3 +257,20 @@ exon_count_distribution_plot_file = plot_exon_count_histogram(exon_count_distrib
 transcript_per_gene_plot_file = plot_transcripts_per_gene_distribution(transcripts_per_gene_distribution, figures_dir / "transcripts_per_gene_distribution.png")
 flagged_plot_file = plot_flagged_vs_unflagged(flagged_vs_unflagged_counts, figures_dir / "flagged_vs_unflagged.png")
 qc_per_transcript_plot_file = plot_qc_flag_counts_per_transcript(qc_flag_counts_per_transcript, figures_dir / "qc_flags_per_transcript.png")
+
+# 4) Build the dictionary that Jinja2 will use
+report_data = {
+    "run_info": run_info,
+    "metrics": metrics,
+    "metrics_table": metrics_table,
+    "plots": {
+        "exon_count": exon_plot_file,
+        "transcripts_per_gene": tpg_plot_file,
+        "flagged_vs_unflagged": flagged_plot_file,
+        "qc_flags_per_transcript": qc_plot_file,
+    },
+}
+
+# 6) Render + write HTML
+html = generate_html_report(report_data)
+(pillar1_dir / "report.html").write_text(html, encoding="utf-8")
