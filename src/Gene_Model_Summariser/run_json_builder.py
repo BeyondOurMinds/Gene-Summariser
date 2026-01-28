@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 #Uses the runner's local timezone automatically
 def whats_the_time_mr_wolf() -> str:
-    return datetime.now().astimezone().isoformat(timespec="seconds")
+    return datetime.now().astimezone().isoformat(timespec="milliseconds")
 
 #get the metadata to add to run.json 
 def file_meta(path: str | Path) -> dict: #take in file as a string/path
