@@ -16,7 +16,10 @@ def whats_the_time_mr_wolf() -> str:
     return datetime.now().astimezone().isoformat(timespec="milliseconds")
 
 #get the metadata to add to run.json 
-def file_meta(path: str | Path) -> dict: #take in file as a string/path
+def file_meta(path: str | Path | None) -> dict: #take in file as a string/path
+    if path is None:
+        return {"path": None, "bytes": None} #fasta is optional - return this 
+
     p = Path(path) #save path as a string or a path 
     if not p.is_file():
         logger.error("Expected file not found: %s", p) #no file present, tell the user and return it as empty string for the run.json
