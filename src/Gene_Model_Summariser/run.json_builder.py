@@ -69,4 +69,38 @@ def update_end_time_and_output_sizes(output_dict: dict[str, Any]) -> dict[str, A
     return output_dict
 
 
+#create an initial run.json at the start of the pipeline. will be imported into main()
+#this writes tool metadata, a start timestamp, input file metadata,and placeholder output metadata
+def make_run_json_file(gff_file: Path, fasta_file: Path, output_dir: Path, results_filename: str = "results.tsv", 
+                       html_filename: str = "results.html",run_filename: str = "run.json") -> Path:
+    
+    output_dir = Path(output_dir) #ensure output_dir is a Path
+    run_path = output_dir / run_filename #full path to the run.json file
+
+    start_time = whats_the_time_mr_wolf() #record the start time
+    #build the run.json dictionary structure
+    run_dict = build_run_json(start_time=start_time, gff_file=Path(gff_file),fasta_file=Path(fasta_file),
+        output_dir=output_dir,results_filename=results_filename,html_filename=html_filename,)
+
+    #write initial run.json (end time unknown yet) as not finished yet
+    write_json_file(run_path, run_dict)
+
+    #return the path
+    return run_path 
+
+
+
+def finalise_run_json_file(output_dir: Path, run_filename: Path = "run.json") -> Path:
+    output_dir = Path(output_dir) #ensure output_dir is a Path
+    run_path = output_dir / run_filename #full path to the run.json file
+
+    #load the previously written run.json created by make_run_json_file
+    #although these functions are next to eachother, they will sandwich the main logic to store start/end time and input/output files
+    with open(run_path, "r", encoding="utf-8") as file:
+        run_dict = json.load(file)
+
+    #update end time and compute output file sizes
+    run_dict = update_end_time_and_output_sizes(run_dict)
+    write_json_file(run_path, run_dict)
+    return run_path
 
