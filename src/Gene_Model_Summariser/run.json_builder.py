@@ -31,7 +31,7 @@ def write_json_file(output_path: str | Path, data: dict[str, Any]) -> None:
         json.dump(data, file, indent=2, sort_keys=True)
         file.write("\n")
 
-
+#run the json file including writing out the tool name/version, start time/input files and outputs 
 def build_run_json(start_time: str, gff_file: Path,fasta_file: Path, output_dir: Path,
     results_filename: str = "results.tsv", html_filename: str = "results.html") -> dict[str, Any]:
     
@@ -46,5 +46,29 @@ def build_run_json(start_time: str, gff_file: Path,fasta_file: Path, output_dir:
         "outputs": {"results_tsv": {"path": str(results_path), "bytes": None}, "results_html": {"path": str(html_path), "bytes": None},
         },
     }
+
+#add what time the file ends after running / size of the output files once built 
+def update_end_time_and_output_sizes(output_dict: dict[str, Any]) -> dict[str, Any]:
+    #set the end time
+    output_dict["timestamp"]["end"] = whats_the_time_mr_wolf()
+
+    # check each output file and store its size
+    script_outputs = ["results_tsv", "results_html"]
+
+    #for the script outputs file, loop over each to grab its path and calculate its size 
+    for output_key in script_outputs:
+        file_path_as_text = output_dict["outputs"][output_key]["path"]
+        file_path = Path(file_path_as_text)
+
+        # if the file exists, get its size. if not, keep bytes as None
+        if file_path.is_file():
+            output_dict["outputs"][output_key]["bytes"] = file_path.stat().st_size
+        else:
+            output_dict["outputs"][output_key]["bytes"] = None
+
+    return output_dict
+
+
+
 
 
