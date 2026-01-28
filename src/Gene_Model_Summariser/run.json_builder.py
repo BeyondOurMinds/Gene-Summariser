@@ -25,4 +25,4 @@ def file_meta(path: str | Path) -> dict: #take in file as a string/path
 def write_json_file(output_path: str | Path, data: dict[str, Any]) -> None:
     with open(output_path, "w", encoding="utf-8") as file:
         json.dump(data, file)
-
+        file.write("\n")
