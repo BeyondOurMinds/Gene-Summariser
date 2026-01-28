@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 #function used to generate the HTML report using Jinja2 templating
 ############################################################################################################################################################################################
 #the function to generate the HTML report using Jinja2 templating (will be saved into a separate HTML generation file(groupB.html.j2) once finalised)
-def generate_html_report(report_data: dict) -> str:  
+def generate_html_report(report_data: dict, template_dir:Path) -> str:  
     # tsv_output will be renamed once Pillar 1 tsv_output dict is finished and finalised
 
     # Get the directory of the current file and set as template folder for Jinja2
@@ -55,7 +55,7 @@ def load_outputs(output_dir: str | Path) -> tuple[pd.DataFrame, dict]:
 
     df = pd.read_csv(tsv_path, sep="\t")
 
-    required = {"gene_id","transcript_id","has_cds","flags","exon_count"}
+    required = {"gene_id","transcript_id","exon_count","has_cds","flags"}
     missing = required - set(df.columns)
     if missing:
         raise ValueError(f"results.tsv missing columns: {sorted(missing)}")
@@ -318,7 +318,7 @@ def save_report_figures(plot_inputs: dict, output_dir: Path) -> dict[str, str]:
 #####################################################################################################################
 #Once all built in Python, put into data dictionary in Jinja2 format
 ####################################################################################################################
-
+#used to build a string with the report data, summary metrics and links to raw .tsv and .json files 
 def build_report_data(report_stats: dict, figures: dict) -> dict:
     return {
         "summary_metrics_table": report_stats["summary_metrics_table"],# summary metrics table
@@ -328,3 +328,22 @@ def build_report_data(report_stats: dict, figures: dict) -> dict:
             "run_json": "run.json", #link to run_json
         }
     }
+
+#this is used for the CLI endpoint to your core tool for generating the report
+def run_report(output_dir: Path, template_dir: Path) -> Path:
+    output_dir = Path(output_dir) #output directory 
+
+    df, run_info = load_outputs(output_dir)  #reads results.tsv + run.json and load them in
+    report_stats = compute_report_stats(df) #compute stats for the reports 
+    figures = save_report_figures(report_stats["plot_inputs"], output_dir) #save figures into this report 
+    
+    #generates the report_data dictionary for Jinha2 loading 
+    report_data = build_report_data(report_stats, figures)
+    report_data["run_info"] = run_info  #provenance block in template
+
+    html = generate_html_report(report_data, template_dir=template_dir) #Loads groupB.html.j2 from template_dir, renders it with data=report_data and returns HTML as a string
+    
+    #load HTML report into output dict  
+    out_html = output_dir / "report.html"
+    out_html.write_text(html, encoding="utf-8")
+    return out_html
