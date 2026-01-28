@@ -15,7 +15,7 @@ class FastaChecker:
 
 
     #accepting file path as Path or str
-    def validate_fasta(self) -> None:
+    def validate_fasta(self) -> bool:
         """
         Validates a FASTA file format using BioPython's SeqIO.
         
@@ -91,6 +91,8 @@ class FastaChecker:
         if sequence_count == 0:
             logger.error("No sequences found in file")
             Valid = False
+        
+        return Valid
 
     def fasta_parse(self):
         try:
