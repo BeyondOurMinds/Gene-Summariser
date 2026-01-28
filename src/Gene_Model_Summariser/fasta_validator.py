@@ -1,81 +1,103 @@
-import sys
 from pathlib import Path
+#importing Set for type hint -> e.g.: seen_ids: Set[str]
+from typing import Set
 import Bio.SeqIO as SeqIO
+import logging
+
+logger = logging.getLogger("GroupB_logger")
+
+
 
 class FastaChecker:
     def __init__(self, fasta_file) -> None:
         self.fasta_file = fasta_file
 
-    def validate_fasta(self):
+
+
+    #accepting file path as Path or str
+    def validate_fasta(self) -> bool:
         """
         Validates a FASTA file format using BioPython's SeqIO.
-        Performs comprehensive checks including structure, content, and format.
+        
+        Performs comprehensive checks:
+        - At least one sequence present
+        - No duplicate sequence IDs
+        - No empty sequences or headers
+        - Valid nucleotide characters (ACGTN, case-insensitive)
         
         Args:
             file_path: Path to the FASTA file
             
-        Returns:
-            bool: True if valid FASTA format, False otherwise
+        Raises:
+            FastaValidationError: If file fails validation checks
+            
+        Example:
+            >>> validate_fasta("genome.fasta")
+            >>> validate_fasta("bad.fasta")  #raises FastaValidationError
         """
-        try:
-            file_path = Path(self.fasta_file)
+        file_path = Path(self.fasta_file)
+        Valid = True
 
-            #here we had file checkers to validate the file exists and is readable
-            #this was removed as per Practical 9 instructions
-            
-            has_sequence = False
-            valid_chars = set('ACGTN')
-            seen_ids = set()
-            sequence_count = 0
-            
-            #SeqIO.parse() will raise an exception if format is invalid
+        #validation state tracking with type hints
+        seen_ids: Set[str] = set()
+        sequence_count: int = 0
+        valid_chars: Set[str] = set('ACGTN')
+        
+        #parse sequences - BioPython will raise ValueError if malformed
+        #try/except block here to catch exceptions where they happen
+        try:
             for record in SeqIO.parse(str(file_path), "fasta"):
-                has_sequence = True
                 sequence_count += 1
                 
-                #check for empty header
-                if not record.id or record.id.strip() == '':
-                    print(f"Error: Empty header found at sequence {sequence_count}")
-                    return False
+                #check for empty or whitespace-only header
+                if not record.id or not record.id.strip():
+                    logger.error(
+                        f"Empty header at sequence {sequence_count}"
+                    )
+                    Valid = False
+
                 
-                #check for duplicate sequence IDs
+                #check for duplicate IDs
                 if record.id in seen_ids:
-                    print(f"Error: Duplicate sequence ID '{record.id}'")
-                    return False
+                    logger.error(f"Duplicate sequence ID: '{record.id}'")
+                    Valid = False
                 seen_ids.add(record.id)
                 
                 #check for empty sequences
                 if len(record.seq) == 0:
-                    print(f"Error: Empty sequence for header '{record.id}'")
-                    return False
+                    logger.error(
+                        f"Empty sequence for ID: '{record.id}'"
+                    )
+                    Valid = False
+
+                #check for invalid characters (case-insensitive)
+                seq_upper: str = str(record.seq).upper()
+                invalid_chars: Set[str] = set(seq_upper) - valid_chars
                 
-                #check for whitespace in sequence
-                seq_str = str(record.seq)
-                if ' ' in seq_str or '\t' in seq_str or '\n' in seq_str:
-                    print(f"Error: Whitespace found in sequence '{record.id}'")
-                    return False
-                
-                #check for valid characters (case insensitive)
-                seq_upper = seq_str.upper()
-                if not all(c in valid_chars for c in seq_upper):
-                    invalid_chars = set(c for c in seq_upper if c not in valid_chars)
-                    print(f"Error: Invalid characters {invalid_chars} in sequence '{record.id}'")
-                    return False
-            
-            if not has_sequence:
-                print(f"Error: No sequence data found in {file_path}")
-                return False
-                
-            return True
-            
-        except Exception as e:
-            print(f"Error reading FASTA file: {e}")
-            return False
-    
+                if invalid_chars:
+                    logger.error(
+                        f"Invalid characters {invalid_chars} in sequence '{record.id}'"
+                    )
+                    Valid = False
+
+        except ValueError as e:
+            #biopython raises ValueError for malformed FASTA
+            logger.error(
+                f"Malformed FASTA format: {e}"
+            )
+            Valid = False
+        
+        #raise validation error if no sequences found
+        if sequence_count == 0:
+            logger.error("No sequences found in file")
+            Valid = False
+        
+        return Valid
+
     def fasta_parse(self):
         try:
             fasta = SeqIO.to_dict(SeqIO.parse(self.fasta_file, 'fasta'))
             return fasta
         except Exception as e:
-            print(f"Error parsing FASTA file: {e}")
+            logger.error(f"Error parsing FASTA file: {e}")
             return None
