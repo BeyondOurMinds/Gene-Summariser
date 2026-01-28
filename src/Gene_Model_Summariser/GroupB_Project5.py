@@ -18,6 +18,9 @@ from .gff_parser import GFF_Parser
 from .gff_validator import check_db
 from .qc_flags_bed import TranscriptWithFlags, write_qc_bed
 from .build_gff import build_gff
+from .run.json_builder import make_run_json_file
+from .run.json_builder import finalise_run_json_file
+
 
 # This is the main function for the Gene Model Summariser. 
 def main(gff_file: str, fasta_file: Optional[str] = None, output_dir: str = ".") -> None:
