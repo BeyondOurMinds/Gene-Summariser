@@ -346,4 +346,4 @@ def run_report(output_dir: Path, template_dir: Path) -> Path:
     #load HTML report into output dict  
     out_html = output_dir / "report.html"
     out_html.write_text(html, encoding="utf-8")
-    return out_html
+    return out_html 
