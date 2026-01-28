@@ -7,10 +7,12 @@ dependencies:
   - python=3.12
   - jinja2=3.*
   - pandas=2.*
-  - pip=24.*
+  - pip
   - snakemake=9.*
   - numpy=1.*
   - matplotlib=3.*
   - seaborn=0.*
-  - gffutils=0.*
   - biopython=1.*
+  - pip:
+      - gffutils>=0.12
+
