@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 import logging
-from typing import Any
+from typing import Any, Optional
 TOOL_NAME = "Gene model summariser (transcript/gene QC summary) - Group B"
 TOOL_VERSION = "1.0.0"
 
@@ -32,7 +32,7 @@ def write_json_file(output_path: str | Path, data: dict[str, Any]) -> None:
         file.write("\n")
 
 #run the json file including writing out the tool name/version, start time/input files and outputs 
-def build_run_json(start_time: str, gff_file: Path,fasta_file: Path, output_dir: Path,
+def build_run_json(start_time: str, gff_file: Path,fasta_file: Optional[Path], output_dir: Path,
     results_filename: str = "results.tsv", html_filename: str = "results.html") -> dict[str, Any]:
     
     output_dir = Path(output_dir) #ensure output_dir is a Path object
@@ -71,7 +71,7 @@ def update_end_time_and_output_sizes(output_dict: dict[str, Any]) -> dict[str, A
 
 #create an initial run.json at the start of the pipeline. will be imported into main()
 #this writes tool metadata, a start timestamp, input file metadata,and placeholder output metadata
-def make_run_json_file(gff_file: Path, fasta_file: Path, output_dir: Path, results_filename: str = "results.tsv", 
+def make_run_json_file(gff_file: Path, fasta_file: Optional[Path], output_dir: Path, results_filename: str = "results.tsv", 
                        html_filename: str = "results.html",run_filename: str = "run.json") -> Path:
     
     output_dir = Path(output_dir) #ensure output_dir is a Path
@@ -87,7 +87,6 @@ def make_run_json_file(gff_file: Path, fasta_file: Path, output_dir: Path, resul
 
     #return the path
     return run_path 
-
 
 
 def finalise_run_json_file(output_dir: Path, run_filename: Path = "run.json") -> Path:
