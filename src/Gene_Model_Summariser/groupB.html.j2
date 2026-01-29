@@ -24,8 +24,8 @@
     <ul>
       <li>Tool: <b>{{ data.provenance.tool_name }}</b></li>
       <li>Version: <b>{{ data.provenance.tool_version }}</b></li>
-      <li>Start: <b>{{ data.provenance.start }}</b></li>
-      <li>End: <b>{{ data.provenance.end }}</b></li>
+      <li>Start: <b>{{ ((data.provenance.start or "NA")[:19]).replace("T"," ") }}</b></li>
+      <li>End: <b>{{ ((data.provenance.end or "NA")[:19]).replace("T"," ") }}</b></li>
       {% if data.provenance.duration_seconds is not none %}
         <li>Duration (s): <b>{{ "%.3f"|format(data.provenance.duration_seconds) }}</b></li>
       {% endif %}

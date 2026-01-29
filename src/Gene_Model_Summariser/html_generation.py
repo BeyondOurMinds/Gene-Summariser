@@ -103,31 +103,30 @@ def build_provenance(run_info: dict) -> dict:
 #function to compute summary metrics from the transcript summary DataFrame
 def compute_summary_metrics(df: pd.DataFrame) -> dict:
     # Function to compute summary metrics from the transcript summary DataFrame
-    total_genes = int(df["gene_id"].nunique()) #calculate the total number of unique gene IDs
-    total_transcripts = int(len(df)) #calculate the total number of transcripts (rows in the DataFrame)
-    
-    # calculate transcripts per gene statistics: mean, median, maximum 
-    transcript_per_gene = df.groupby("gene_id")["transcript_id"].nunique() #how many genes have how many transcripts
-    transcript_mean = float(transcript_per_gene.mean()) if len(transcript_per_gene) else 0.0 #calculate mean transcripts per gene
-    transcript_median = float(transcript_per_gene.median()) if len(transcript_per_gene) else 0.0 #calculate median transcripts per gene
-    transcript_max = int(transcript_per_gene.max()) if len(transcript_per_gene) else 0 #calculate maximum transcripts per gene
+    total_genes = int(df["gene_id"].nunique())  # calculate the total number of unique gene IDs
+    total_transcripts = int(len(df))  # calculate the total number of transcripts (rows in the DataFrame)
+
+    # calculate transcripts per gene statistics: mean, median, maximum
+    transcript_per_gene = df.groupby("gene_id")["transcript_id"].nunique()  # how many genes have how many transcripts
+    transcript_mean = round(float(transcript_per_gene.mean()), 2) if len(transcript_per_gene) else 0.0  # calculate mean transcripts per gene (2 d.p.)
+    transcript_median = round(float(transcript_per_gene.median()), 2) if len(transcript_per_gene) else 0.0  # calculate median transcripts per gene (2 d.p.)
+    transcript_max = int(transcript_per_gene.max()) if len(transcript_per_gene) else 0  # calculate maximum transcripts per gene
 
     # calculate percentage of transcripts with has_cds = true
-    #count how many transcripts have has_cds = true
-    has_cds_bool = df["has_cds"].astype(str).str.lower().isin(["true"]) #make sure tsv can be comptabible strings and bool 
+    # count how many transcripts have has_cds = true
+    has_cds_bool = df["has_cds"].astype(str).str.lower().isin(["true"])  # make sure tsv can be compatible strings and bool
     has_cds_count = int(has_cds_bool.sum())
-    has_cds_percent = (has_cds_count / total_transcripts) * 100 if total_transcripts > 0 else 0.0 #calculate percentage of transcripts with has_cds = true
+    has_cds_percent = round((has_cds_count / total_transcripts) * 100, 2) if total_transcripts > 0 else 0.0  # calculate percentage of transcripts with has_cds = true (2 d.p.)
 
     # calculate percentage of transcripts with QC flags (flags column not empty)
-    flags_clean = df["flags"].fillna("").astype(str).str.strip() #clean flags to make sure stripped of white space and remove any NANs with '' for counting
-    flagged_transcripts_count = int((flags_clean != "").sum()) #count flags
-    flagged_transcripts_percent = (flagged_transcripts_count / total_transcripts) * 100 if total_transcripts > 0 else 0.0
+    flags_clean = df["flags"].fillna("").astype(str).str.strip()  # clean flags to make sure stripped of white space and remove any NANs with '' for counting
+    flagged_transcripts_count = int((flags_clean != "").sum())  # count flags
+    flagged_transcripts_percent = round((flagged_transcripts_count / total_transcripts) * 100, 2) if total_transcripts > 0 else 0.0  # calculate percentage flagged (2 d.p.)
 
-    
     return {
         "total_genes": total_genes,
         "total_transcripts": total_transcripts,
-        "transcript_mean": transcript_mean,                 
+        "transcript_mean": transcript_mean,
         "transcript_median": transcript_median,
         "transcript_max": transcript_max,
         "has_cds_count": has_cds_count,
