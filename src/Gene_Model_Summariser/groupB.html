@@ -15,27 +15,27 @@
   </style>
 </head>
 
-<div class="box">
-  <h2>Provenance</h2>
-  <ul>
-    <li>Tool: <b>{{ data.run_info.tool.name }}</b></li>
-    <li>Version: <b>{{ data.run_info.tool.version }}</b></li>
-    <li>Start: <b>{{ data.run_info.timestamp.start }}</b></li>
-    <li>End: <b>{{ data.run_info.timestamp.end }}</b></li>
-    {% if data.run_info.timestamp.duration_seconds is defined %}
-      <li>Duration (s): <b>{{ "%.3f"|format(data.run_info.timestamp.duration_seconds) }}</b></li>
-    {% endif %}
-  </ul>
-
-  <p>
-    Raw artefacts:
-    <a href="run.json">run.json</a> ·
-    <a href="results.tsv">results.tsv</a>
-  </p>
-</div>
-
 <body>
   <h1>Gene Model Summariser — Report</h1>
+
+  <div class="box">
+    <h2>Provenance</h2>
+    <ul>
+      <li>Tool: <b>{{ data.provenance.tool_name }}</b></li>
+      <li>Version: <b>{{ data.provenance.tool_version }}</b></li>
+      <li>Start: <b>{{ data.provenance.start }}</b></li>
+      <li>End: <b>{{ data.provenance.end }}</b></li>
+      {% if data.provenance.duration_seconds is not none %}
+        <li>Duration (s): <b>{{ "%.3f"|format(data.provenance.duration_seconds) }}</b></li>
+      {% endif %}
+    </ul>
+
+    <p>
+      Raw artefacts:
+      <a href="{{ data.artefacts.run_json }}">run.json</a> ·
+      <a href="{{ data.artefacts.results_tsv }}">results.tsv</a>
+    </p>
+  </div>
 
   <div class="box">
     <h2>Artefacts</h2>
@@ -92,9 +92,5 @@
     <img src="figures/{{ data.figures.qc_flags_per_transcript_plot }}" alt="QC flag counts">
   </div>
 
-  <div class="box">
-    <h2>Provenance (run.json)</h2>
-    <pre>{{ data.run_info | tojson(indent=2) }}</pre>
-  </div>
 </body>
 </html>
