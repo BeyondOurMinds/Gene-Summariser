@@ -350,7 +350,7 @@ def build_report_data(report_stats: dict, figures: dict) -> dict:
     return {
         "summary_metrics": report_stats["summary_metrics"],
         "summary_metrics_table": report_stats["summary_metrics_table"],
-        "Quality Control Flag Definitions": QC_FLAG_DEFINITIONS,
+        "qc_flag_definitions": QC_FLAG_DEFINITIONS,
         "figures": figures,
         "artefacts": {"results_tsv": "results.tsv", "run_json": "run.json"},
     }
