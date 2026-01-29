@@ -2,7 +2,6 @@ import pytest
 import gffutils
 from pathlib import Path
 from Gene_Model_Summariser.QC_check import QC_flags
-from Gene_Model_Summariser.gff_parser import GFF_Parser
 
 @pytest.fixture
 def gff_db_fixture(tmp_path):
