@@ -5,6 +5,7 @@ It uses Jinja2 templating to create the HTML structure and pandas to process the
 '''
 
 from pathlib import Path
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import pandas as pd
 import json
@@ -38,7 +39,8 @@ def generate_html_report(report_data: dict, template_dir: Path) -> str:
 
 
 ####################################################################################################################################################################################
-#building a function to open and extract data from tsv and json files
+#building functions to open and extract data from tsv and json files
+#parser for run.json for HTML 
 ####################################################################################################################################################################################
 
 def load_outputs(output_dir: str | Path) -> tuple[pd.DataFrame, dict]:
@@ -64,6 +66,35 @@ def load_outputs(output_dir: str | Path) -> tuple[pd.DataFrame, dict]:
         run_info = json.load(f)
 
     return df, run_info
+
+####################################################################################################################################################################################
+#parser for run.json for HTML header 
+####################################################################################################################################################################################
+
+
+def parse_runjson_time(ts: str) -> datetime:
+    return datetime.fromisoformat(ts)
+
+def build_provenance(run_info: dict) -> dict:
+    tool_name = run_info.get("tool", {}).get("name")
+    tool_version = run_info.get("tool", {}).get("version")
+
+    start_script = run_info.get("timestamp", {}).get("start")
+    end_script = run_info.get("timestamp", {}).get("end")
+
+    duration_seconds = None
+    if start_script and end_script:
+        try:
+            duration_seconds = (parse_runjson_time(end_script) - parse_runjson_time(start_script)).total_seconds()
+        except Exception:
+            duration_seconds = None
+
+    return {
+        "tool_name": tool_name,
+        "tool_version": tool_version,
+        "start": start_script,
+        "end": end_script,
+        "duration_seconds": duration_seconds}
 
 ####################################################################################################################################################################################
 #functions to compute various metrics from the transcript summary DataFrame
