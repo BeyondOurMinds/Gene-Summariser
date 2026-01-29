@@ -12,6 +12,7 @@
     th { border-top: none; }
     img { max-width: 100%; height: auto; border: 1px solid #eee; border-radius: 10px; }
     pre { background: #111; color: #eee; padding: 10px; border-radius: 10px; overflow-x: auto; }
+    code { background: #f6f6f6; padding: 2px 6px; border-radius: 6px; }
   </style>
 </head>
 
@@ -65,8 +66,8 @@
         <tbody>
           {% for row in data.summary_metrics_table %}
             <tr>
-              <td>{{ row.metric }}</td>
-              <td>{{ row.value }}</td>
+              <td>{{ row["metric"] }}</td>
+              <td>{{ row["value"] }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -90,6 +91,28 @@
 
     <h3>QC flag counts</h3>
     <img src="figures/{{ data.figures.qc_flags_per_transcript_plot }}" alt="QC flag counts">
+  </div>
+
+  <div class="box">
+    <h2>QC flag definitions</h2>
+
+    {% if data.qc_flag_definitions %}
+      <table>
+        <thead>
+          <tr><th>Flag</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          {% for flag in data.qc_flag_names %}
+            <tr>
+              <td><code>{{ flag }}</code></td>
+              <td>{{ data.qc_flag_definitions.get(flag, "No definition available.") }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No QC flag definitions available.</p>
+    {% endif %}
   </div>
 
 </body>

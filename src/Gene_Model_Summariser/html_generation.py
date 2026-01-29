@@ -11,6 +11,23 @@ import pandas as pd
 import json
 import matplotlib.pyplot as plt
 
+#this is hardcoded in here and called later to load onto the HTML 
+
+QC_FLAG_DEFINITIONS = {
+    "exon_count>5": "Transcript has more than 5 exons.",
+    "overlapping_exons": "At least two exons overlap in genomic coordinates.",
+    "invalid_CDS_phase": "A CDS feature has an invalid phase/frame (not 0/1/2).",
+    "N_in_CDS": "CDS sequence contains one or more 'N' bases.",
+    "ambiguous_bases_in_CDS": "CDS contains bases outside A/C/G/T/N.",
+    "CDS_not_multiple_of_3": "Total CDS length is not divisible by 3.",
+    "invalid_start_codon": "CDS does not start with ATG.",
+    "invalid_stop_codon": "CDS does not end with TAA/TAG/TGA.",
+    "CDS_too_short": "CDS length is < 3 bases.",
+    "no_CDS": "Transcript has no CDS features.",
+}
+
+
+
 ####################################################################################################################################################################################
 #function used to generate the HTML report using Jinja2 templating
 ############################################################################################################################################################################################
@@ -113,7 +130,9 @@ def compute_summary_metrics(df: pd.DataFrame) -> dict:
     transcript_max = int(transcript_per_gene.max()) if len(transcript_per_gene) else 0 #calculate maximum transcripts per gene
 
     # calculate percentage of transcripts with has_cds = true
-    has_cds_count = int(df["has_cds"].sum()) #count how many transcripts have has_cds = true
+    #count how many transcripts have has_cds = true
+    has_cds_bool = df["has_cds"].astype(str).str.lower().isin(["true"]) #make sure tsv can be comptabible strings and bool 
+    has_cds_count = int(has_cds_bool.sum())
     has_cds_percent = (has_cds_count / total_transcripts) * 100 if total_transcripts > 0 else 0.0 #calculate percentage of transcripts with has_cds = true
 
     # calculate percentage of transcripts with QC flags (flags column not empty)
@@ -347,7 +366,8 @@ def save_report_figures(plot_inputs: dict, output_dir: Path) -> dict[str, str]:
 def build_report_data(report_stats: dict, figures: dict) -> dict:
     return {
         "summary_metrics": report_stats["summary_metrics"],
-        "summary_metrics_table": report_stats["summary_metrics_table"],  # <-- add this
+        "summary_metrics_table": report_stats["summary_metrics_table"],
+        "Quality Control Flag Definitions": QC_FLAG_DEFINITIONS,
         "figures": figures,
         "artefacts": {"results_tsv": "results.tsv", "run_json": "run.json"},
     }
