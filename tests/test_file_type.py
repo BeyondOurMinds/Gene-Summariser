@@ -3,7 +3,7 @@ import os
 import gffutils
 import pytest
 from pathlib import Path
-from GroupB_Project5 import load_gff_database
+from Gene_Model_Summariser.GroupB_Project5 import load_gff_database
 
 def validate_gff_file(args):
     #convert string to path object -> cross platform compatibility ("\" on Linux/Mac and "/" on Windows)
