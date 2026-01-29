@@ -14,15 +14,11 @@ import matplotlib.pyplot as plt
 #function used to generate the HTML report using Jinja2 templating
 ############################################################################################################################################################################################
 #the function to generate the HTML report using Jinja2 templating (will be saved into a separate HTML generation file(groupB.html.j2) once finalised)
-def generate_html_report(report_data: dict, template_dir:Path) -> str:  
-    # tsv_output will be renamed once Pillar 1 tsv_output dict is finished and finalised
+def generate_html_report(report_data: dict, template_dir: Path) -> str:
+    template_dir = Path(template_dir)
 
-    # Get the directory of the current file and set as template folder for Jinja2
-    output_dir = Path(__file__).resolve().parent  
-
-    # Set up Jinja2 environment from the folder
     env = Environment(
-        loader=FileSystemLoader(str(output_dir)),
+        loader=FileSystemLoader(str(template_dir)),
         autoescape=select_autoescape(["html", "xml"]),
     )
 
@@ -31,12 +27,15 @@ def generate_html_report(report_data: dict, template_dir:Path) -> str:
     try:
         template = env.get_template(template_name)
     except Exception as e:
-        raise FileNotFoundError(f"Could not find template '{template_name}' in {output_dir}") from e
+        raise FileNotFoundError(
+            f"Could not find template '{template_name}' in {template_dir}"
+        ) from e
 
     # tsv_output will be available in Jinja as {{ data }}
     html_output = template.render(data=report_data)
 
     return html_output
+
 
 ####################################################################################################################################################################################
 #building a function to open and extract data from tsv and json files
@@ -319,14 +318,12 @@ def save_report_figures(plot_inputs: dict, output_dir: Path) -> dict[str, str]:
 #Once all built in Python, put into data dictionary in Jinja2 format
 ####################################################################################################################
 #used to build a string with the report data, summary metrics and links to raw .tsv and .json files 
+
 def build_report_data(report_stats: dict, figures: dict) -> dict:
     return {
-        "summary_metrics_table": report_stats["summary_metrics_table"],# summary metrics table
-        "figures": figures,# figure filenames for embedding
-        "artefacts": {
-            "results_tsv": "results.tsv", #link to results.tsv 
-            "run_json": "run.json", #link to run_json
-        }
+        "summary_metrics": report_stats["summary_metrics"], #summary metrics table loaded in
+        "figures": figures, # figure filenames for embedding
+        "artefacts": {"results_tsv": "results.tsv", "run_json": "run.json"}, #link to run_json
     }
 
 #this is used for the CLI endpoint to your core tool for generating the report
