@@ -12,3 +12,12 @@ def gff_db_fixture(tmp_path):
     db_path = tmp_path / "test.db"
     db = gffutils.create_db(str(gff_fixture), dbfn=str(db_path), force=True, keep_order=True)
     return db
+
+class TestGFFParser:
+
+    def test_initialization(self, gff_db_fixture):
+        """
+        Test that the parser initializes correctly with a GFF database.
+        """
+        parser = GFF_Parser(gff_db_fixture)
+        assert parser.db is not None
