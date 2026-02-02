@@ -2,7 +2,6 @@
 # line_length_checker(): checks raw GFF text lines have 9 tab-separated columns (skips blank/comment lines)
 # validate_X_Y_Z(): checks parsed GFF features for required fields and valid values
 
-
 import logging
 
 logger = logging.getLogger("GroupB_logger")
