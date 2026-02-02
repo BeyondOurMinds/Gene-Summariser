@@ -1,21 +1,11 @@
 #GFF FILE VALIDATOR FUNCTIONS
-#use line_length_checker when actually parsing the gff file to check for any errors 
-#check each feature in the gff db for the following:
-# skip hashtag lines/blank lines to check every valid line has 9 columns 
+# line_length_checker(): checks raw GFF text lines have 9 tab-separated columns (skips blank/comment lines)
+# validate_X_Y_Z(): checks parsed GFF features for required fields and valid values
+
 
 import logging
 
 logger = logging.getLogger("GroupB_logger")
-
-def line_length_checker(line: str, line_number: int):
-    stripped = line.strip()
-    if stripped == "" or stripped.startswith("#"):
-        return None
-    columns = stripped.split("\t")
-    if len(columns) != 9:
-        logger.error(f"Line {line_number}: Expected 9 tab-separated columns, found {len(columns)}. Line was: {stripped}")
-        return None
-    return columns
 
 #required fields (seqid, source, type)
 def validate_required_fields(feature) -> bool:
@@ -30,7 +20,7 @@ def validate_required_fields(feature) -> bool:
         return False
     return True
 
-#coordinates (start, end)
+#coordinates (start, end), numeric and start <= end
 def validate_coordinates(feature) -> bool:
     if feature.start is None or feature.start == "":
         logger.error(f"Feature missing start on feature {feature.id}")
