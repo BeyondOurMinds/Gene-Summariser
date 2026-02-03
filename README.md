@@ -28,7 +28,7 @@ pip install -e . --no-deps
 docker pull beyondourminds/gene-summariser:latest
 ```
 
-### For Development
+### Pip
 
 1. Clone the repository:
 ```bash
@@ -57,7 +57,7 @@ python -m venv .venv
 ```bash
 source .venv/bin/activate
 ```
-
+### For Developers
 4. Install the package in editable mode:
 ```bash
 pip install -e .
@@ -65,12 +65,12 @@ pip install -e .
 
 ### For End Users
 
-Simply install the package:
+4. Simply install the package:
 ```bash
 pip install .
 ```
 
-Or install directly from GitHub (once published):
+Or install directly from GitHub:
 ```bash
 pip install git+https://github.com/biol5472-uofglasgow/GroupB_Project.git
 ```
