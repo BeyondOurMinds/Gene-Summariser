@@ -149,6 +149,40 @@ class QC_flags:
             cds_seq += cds_segment[phase:]
         return cds_seq
     
+    def check_cds_quality(self, transcript_id: str, features, chrom_sequence: str, strand: str, gff_flags) -> None:
+        """
+        Performs quality checks on the CDS sequence.
+        Checks for N bases, ambiguous bases, length divisibility, start/stop codons, and minimum length.
+        Updates gff_flags dictionary with any issues found.
+        """
+        # Sort CDS features by their start position
+        # Create list of (start_position, cds_feature) tuples
+        cds_list = self.list_cds(features, strand)
+        
+        # Build complete CDS sequence with phase adjustment
+        cds_seq = self.cds_sequence(features, cds_list, chrom_sequence, strand, gff_flags, transcript_id)
+        
+        # Check for issues in the complete CDS sequence
+        if self.contains_N(cds_seq):
+            gff_flags[transcript_id].append('N_in_CDS')
+        if self.ambiguous_bases(cds_seq):
+            gff_flags[transcript_id].append('ambiguous_bases_in_CDS')
+        
+        #check length multiple of 3
+        if len(cds_seq) % 3 != 0:
+            gff_flags[transcript_id].append('CDS_not_multiple_of_3')
+        
+        # Check start codon (first 3 bases of CDS)
+        if not self.cds_start(cds_seq):
+            gff_flags[transcript_id].append('invalid_start_codon')
+        
+        # Check stop codon (last 3 bases of CDS)
+        if not self.cds_stop(cds_seq):
+            gff_flags[transcript_id].append('invalid_stop_codon')
+        
+        if len(cds_seq) < 3:
+            gff_flags[transcript_id].append('CDS_too_short')
+    
     def fasta_qc(self, transcript_id: str, features, gff_flags) -> None:
         """
         Performs QC checks on the FASTA sequence corresponding to the given transcript ID and features.
@@ -163,33 +197,7 @@ class QC_flags:
             chrom_sequence = str(seq_record.seq)
             strand = gene_feature.strand
             if features['CDS(s)']:
-                # Sort CDS features by their start position
-                # Create list of (start_position, cds_feature) tuples
-                cds_list = self.list_cds(features, strand)
-                
-                # Build complete CDS sequence with phase adjustment
-                cds_seq = self.cds_sequence(features, cds_list, chrom_sequence, strand, gff_flags, transcript_id)
-                
-                # Check for issues in the complete CDS sequence
-                if self.contains_N(cds_seq):
-                    gff_flags[transcript_id].append('N_in_CDS')
-                if self.ambiguous_bases(cds_seq):
-                    gff_flags[transcript_id].append('ambiguous_bases_in_CDS')
-                
-                #check length multiple of 3
-                if len(cds_seq) % 3 != 0:
-                    gff_flags[transcript_id].append('CDS_not_multiple_of_3')
-                
-                # Check start codon (first 3 bases of CDS)
-                if not self.cds_start(cds_seq):
-                    gff_flags[transcript_id].append('invalid_start_codon')
-                
-                # Check stop codon (last 3 bases of CDS)
-                if not self.cds_stop(cds_seq):
-                    gff_flags[transcript_id].append('invalid_stop_codon')
-                
-                if len(cds_seq) < 3:
-                    gff_flags[transcript_id].append('CDS_too_short')
+                self.check_cds_quality(transcript_id, features, chrom_sequence, strand, gff_flags)
             else:
                 gff_flags[transcript_id].append('no_CDS')
         
