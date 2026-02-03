@@ -1,6 +1,6 @@
 # GroupB_Project
 
-A command-line tool to summarize gene models and output basic GC metrics.
+A command-line tool to summarize gene models and output basic QC metrics.
 
 **Project Selection:** Project 5  
 **Group Members:** John Hardin, Hans Henrik Norberg, Dom Thompson  
@@ -8,6 +8,27 @@ A command-line tool to summarize gene models and output basic GC metrics.
 
 ## Current Version
 v1.1.0
+
+## About
+### What it is
+This tool is used to analyse a GFF file, and optionally a FASTA file, and output QC metrics for flagged transcripts. 
+
+### Outputs
+This tool produces 6 outputs:
+1. transcript_summary.tsv:
+- This is your basic output file that outputs a ror each transcript in the format: gene_id, transcript_id, n_exons, has_cds, chrom, start, end, strand, flags
+2. qc_flags.gff3:
+- This file is a copy of relevant transcript features with QC flags embedded as an attribute. 
+- Output in the standard GFF file format and loadable in genome browsers.
+3. qc_flagged.bed:
+- Outputs a BED file containing the loci of flagged items for quick browsing
+- Loadable in genome browsers with color coordination
+4. report.html:
+- An HTML file that provides a visual report of the flagged and unflagged transcripts
+5. figures:
+- a folder containing all of the figures made/used in the HTML report
+6. run.json
+- a run file that contains a record of the tool, timestamp, inputs, fasta file (if provided), outputs, and HTML result file. 
 
 ## Installation
 
