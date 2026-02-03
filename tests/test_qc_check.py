@@ -30,7 +30,7 @@ class TestQCCheck:
         Test the gff_QC method to ensure it generates QC flags correctly.
         """
 
-        flags = QC_flags(gff_db_fixture).gff_QC()
+        flags = QC_flags(gff_db_fixture).transcript_QC()
         assert "exon_count>5" in flags.get("tx3", [])
         assert "overlapping_exons" in flags.get("tx3", [])
         assert "no_CDS" in flags.get("tx2", [])
@@ -41,7 +41,7 @@ class TestQCCheck:
         """
 
         qc_checker = QC_flags(gff_db_fixture, fasta_file_fixture)
-        flags = qc_checker.gff_QC()
+        flags = qc_checker.transcript_QC()
         
         # Test tx3 has multiple QC flags
         tx3_flags = flags.get("tx3", [])
