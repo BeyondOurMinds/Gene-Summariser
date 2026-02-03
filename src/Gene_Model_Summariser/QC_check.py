@@ -151,8 +151,7 @@ class QC_flags:
     
     def check_cds_quality(self, transcript_id: str, features, chrom_sequence: str, strand: str, gff_flags) -> None:
         """
-        Performs quality checks on the CDS sequence.
-        Checks for N bases, ambiguous bases, length divisibility, start/stop codons, and minimum length.
+        Calls all quality check functions for the CDS of a given transcript.
         Updates gff_flags dictionary with any issues found.
         """
         # Sort CDS features by their start position
