@@ -3,6 +3,7 @@
 # validate_X_Y_Z(): checks parsed GFF features for required fields and valid values
 
 import logging
+from pathlib import Path
 
 logger = logging.getLogger("GroupB_logger")
 
