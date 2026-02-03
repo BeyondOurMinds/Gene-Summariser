@@ -25,7 +25,7 @@ pip install -e . --no-deps
 ### Docker:
 1. Pull from docker hub
 ```bash
-docker pull beyondourminds/groupb-tool:latest
+docker pull beyondourminds/gene-summariser:latest
 ```
 
 ### For Development
