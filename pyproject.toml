@@ -30,6 +30,12 @@ dev = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+Gene_Model_Summariser = ["*.j2"]
+
 [project.scripts]
 GroupB-tool="Gene_Model_Summariser.cli:app"
 
