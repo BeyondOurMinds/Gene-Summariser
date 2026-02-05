@@ -19,7 +19,7 @@ COPY src/ ./src/
 RUN pip install --no-cache-dir --no-deps .
 
 # Set the entry point to the CLI tool
-ENTRYPOINT ["GroupB-tool"]
+ENTRYPOINT ["gene-summariser-tool"]
 
 # Default command (show help if no arguments provided)
 CMD ["--help"]

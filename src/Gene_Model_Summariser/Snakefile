@@ -1,6 +1,6 @@
 #Snakemake file for Gene Model Summariser
 
-configfile: "biol5472_groupB_config.yaml"
+configfile: "gene_summariser_config.yaml"
 from snakemake.io import directory
 
 OUTDIR = config.get("outdir", "results/Gene_Model_Summariser")

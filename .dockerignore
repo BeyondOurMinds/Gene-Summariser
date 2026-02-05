@@ -1,4 +1,4 @@
-# Docker ignore file for GroupB-tool
+# Docker ignore file for gene-summariser-tool
 # Exclude unnecessary files from Docker build context
 
 # Python

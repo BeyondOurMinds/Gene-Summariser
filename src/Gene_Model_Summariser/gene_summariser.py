@@ -69,7 +69,7 @@ def main(gff_file: str, fasta_file: Optional[str] = None, output_dir: str = ".")
         logger.error("GFF database validation failed. Exiting.") # Log error if GFF validation fails
         raise SystemExit(1)
     
-    template_dir = Path(__file__).resolve().parent  # folder containing groupB.html.j2
+    template_dir = Path(__file__).resolve().parent  # folder containing gene_summariser.html.j2
     report_path = run_report(output_dir=out_dir, template_dir=template_dir)  #writes output_dir/report.html
     logger.info(f"HTML report written to: {report_path}") #tells user where HTML is stored 
     finalise_run_json_file(output_dir=out_dir, run_filename=Path("run.json"))
@@ -130,7 +130,7 @@ def setup_logger(log_file: str | Path) -> logging.Logger:
     setup_logger: Configures and returns a logger that writes to the specified log file.
     log_file: Path to the log file where log messages will be written.
     """
-    logger = logging.getLogger("GroupB_logger")
+    logger = logging.getLogger("gene_summariser_logger")
     logger.setLevel(logging.INFO)
     logger.handlers.clear() # remove existing handlers so each run logs to the right file
     #prevent duplicates if run script multiple times

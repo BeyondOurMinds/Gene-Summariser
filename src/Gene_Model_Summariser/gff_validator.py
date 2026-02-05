@@ -5,7 +5,7 @@
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("GroupB_logger")
+logger = logging.getLogger("gene_summariser_logger")
 
 #line length checker - ensures the lines are 9 tab speratbles columns and skips past the hashtags in the file
 def line_length_checker(line: str, line_number: int):

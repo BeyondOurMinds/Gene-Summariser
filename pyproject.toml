@@ -1,5 +1,5 @@
 [project]
-name = "GroupB-tool"
+name = "gene-summariser-tool"
 version = "1.1.0"
 requires-python = ">=3.13"
 dependencies=[
@@ -37,7 +37,7 @@ where = ["src"]
 Gene_Model_Summariser = ["*.j2"]
 
 [project.scripts]
-GroupB-tool="Gene_Model_Summariser.cli:app"
+gene-summariser-tool="Gene_Model_Summariser.cli:app"
 
 [tool.pytest.ini_options]
 testpaths=["tests"]

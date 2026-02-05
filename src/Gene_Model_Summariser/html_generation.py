@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 ####################################################################################################################################################################################
 #function used to generate the HTML report using Jinja2 templating
 ############################################################################################################################################################################################
-#the function to generate the HTML report using Jinja2 templating (will be saved into a separate HTML generation file(groupB.html.j2) once finalised)
+#the function to generate the HTML report using Jinja2 templating (will be saved into a separate HTML generation file(gene_summariser.html.j2) once finalised)
 def generate_html_report(report_data: dict, template_dir: Path) -> str:
     template_dir = Path(template_dir)
 
@@ -24,7 +24,7 @@ def generate_html_report(report_data: dict, template_dir: Path) -> str:
     )
 
   #load the HTML Jinja2 template from template_dir
-    template_name = "groupB.html.j2"
+    template_name = "gene_summariser.html.j2"
     try:
         template = env.get_template(template_name)
     except Exception as e:
@@ -377,7 +377,7 @@ def run_report(output_dir: Path, template_dir: Path | None = None) -> Path:
     report_data["run_info"] = run_info
     report_data["provenance"] = build_provenance(run_info)
 
-    html = generate_html_report(report_data, template_dir=template_dir)  # loads groupB.html.j2 from template_dir
+    html = generate_html_report(report_data, template_dir=template_dir)  # loads gene_summariser.html.j2 from template_dir
 
     # load HTML report into output dir
     out_html = output_dir / "report.html"

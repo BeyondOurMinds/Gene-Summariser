@@ -1,7 +1,7 @@
 import argparse
 import os
 import re
-from .GroupB_Project5 import main
+from .gene_summariser import main
 
 
 def get_next_run_dir(base_dir: str) -> str:
@@ -53,7 +53,7 @@ def app():
     else:
         args.outdir = get_next_run_dir(os.path.abspath(args.outdir))
     
-    # Call the main function from GroupB_Project5.py with the parsed arguments
+    # Call the main function from gene_summariser.py with the parsed arguments
     main(args.gff, args.fasta, args.outdir)
     
     return 0

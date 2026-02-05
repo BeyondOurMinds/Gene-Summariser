@@ -119,7 +119,7 @@ pip install git+https://github.com/BeyondOurMinds/Gene-Summariser.git
 
 ## pip
 ```bash
-Gene-Summariser --gff data/models.gff --fasta data/ref.fasta --outdir results/
+gene-summariser-tool --gff data/models.gff --fasta data/ref.fasta --outdir results/
 ```
 
 ### Docker

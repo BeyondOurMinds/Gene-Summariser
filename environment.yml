@@ -1,5 +1,5 @@
 #environemnt.yml used for conda environment set up 
-name: biol5472_groupB
+name: gene_summariser
 
 channels:
   - conda-forge
