@@ -1,12 +1,12 @@
-# GroupB_Project
+# Gene-Summariser
 
 A command-line tool to summarize gene models and output basic QC metrics.
 Tool execution will terminate if GFF or FASTA validation fails.
 Details of validation errors are recorded in the log file.
 
-**Project Selection:** Project 5  
 **Group Members:** John Hardin, Hans Henrik Norberg, Dom Thompson  
-**Built for:** BIOL5472 Course at the University of Glasgow
+
+**This tool was originally made for a university project and was forked over to preserve the repository. To avoid uses in plagiarism for future course students, certain aspects of this README have either been removed (and will be marked as so) or names of functions will have been changed so as not to reference the course/university**
 
 ## Current Version
 v1.1.0
@@ -48,15 +48,7 @@ Violations of these assumptions are recorded as QC flags but may reflect annotat
 ## Installation
 
 ### Conda Installer : 
-1. Create and activate the conda environment:
-```bash
-conda env create -f environment.yml
-conda activate biol5472_groupB
-```
-2. Install the tool:
-```bash
-pip install -e . --no-deps
-```
+1. **functionality not available**
 
 ### Docker:
 1. Pull from Docker Hub
@@ -68,8 +60,8 @@ docker pull beyondourminds/gene-summariser:latest
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/biol5472-uofglasgow/GroupB_Project.git
-cd GroupB_Project
+git clone https://github.com/BeyondOurMinds/Gene-Summariser.git
+cd Gene-Summariser
 ```
 
 2. Create a virtual environment:
@@ -108,7 +100,7 @@ pip install .
 
 Or install directly from GitHub:
 ```bash
-pip install git+https://github.com/biol5472-uofglasgow/GroupB_Project.git
+pip install git+https://github.com/BeyondOurMinds/Gene-Summariser.git
 ```
 
 ## Usage
@@ -122,9 +114,12 @@ pip install git+https://github.com/biol5472-uofglasgow/GroupB_Project.git
 - Takes in the desired directory for output
 - If no arguments provided, defaults to the directory of the inputted gff file as results/run_# where # is the current run number
 
-### Conda and pip
+### Conda
+**Functionality currently removed**
+
+## pip
 ```bash
-GroupB-tool --gff data/models.gff --fasta data/ref.fasta --outdir results/
+Gene-Summariser --gff data/models.gff --fasta data/ref.fasta --outdir results/
 ```
 
 ### Docker
@@ -150,19 +145,6 @@ Run the tool with no provided arguments, or provide the --help command
 - biopython >= 1.85
 - jinja2 >= 3.1.0
 
-## Outputs
-results/run_001/
-├── results.tsv              # Transcript-level summary metrics and QC flags
-├── report.html              # Auto-generated interactive HTML report
-├── run.json                 # Provenance metadata (inputs, outputs, timestamps, tool version)
-├── qc_flagged.bed           # Genomic intervals of transcripts with QC flags (used for genome browser)
-├── qc_flags.gff3            # GFF annotated with QC flag information (used for genome browser)
-├── figures/                 # Plots used in the HTML report ()
-│   ├── exon_count_distribution.png
-│   ├── transcripts_per_gene_distribution.png
-│   ├── flagged_vs_unflagged.png
-│   └── qc_flags_per_transcript.png
-└── gene_model_summariser.log  # Validation messages and runtime logging
 
 ### Using output files from the script
 
